@@ -680,6 +680,27 @@ function matchYahooName(name,pos,team){
   });
   return best;
 }
+/* Board fallback: Yahoo couldn't give a full name, only board rows with
+   abbreviated name + pos + team (e.g. "D. Kincaid"/TE/Buf). Match by LAST
+   name + position + team among players not yet drafted — usually unique. */
+function matchFromBoard(board){
+  if(!Array.isArray(board))return null;
+  for(var i=0;i<board.length;i++){
+    var b=board[i];
+    var last=syncNorm(b.last||'');
+    if(!last)continue;
+    var cands=PLAYERS.filter(function(p){
+      if(isGone(p.n))return false;                       // already tagged -> skip
+      if(b.pos&&p.p!==b.pos)return false;
+      if(b.team&&p.t&&p.t.toUpperCase()!==b.team.toUpperCase())return false;
+      // last word of app name matches board last name
+      var pl=syncNorm(p.n.split(' ').slice(-1)[0]);
+      return pl===last;
+    });
+    if(cands.length===1)return cands[0].n;               // unique -> confident match
+  }
+  return null;
+}
 var _syncSeen={};
 function applyYahooPicks(list){
   if(!Array.isArray(list))return;
@@ -687,20 +708,20 @@ function applyYahooPicks(list){
   list.forEach(function(pk){
     var pid=String(pk.id);
     if(_syncSeen[pid])return;               // already processed this pick slot
-    // DEF pick? Yahoo pos would be 'DEF' — our defenses aren't in DRAFT by name,
-    // so skip auto-DEF (user picks their own DEF; opponent DEFs don't matter here).
     if((pk.pos||'').toUpperCase()==='DEF'){ _syncSeen[pid]=true; return; }
-    var appName=matchYahooName(pk.name,pk.pos,pk.team);
+    var appName=pk.name?matchYahooName(pk.name,pk.pos,pk.team):null;
+    // board fallback when Yahoo had no full name
+    if(!appName&&pk.board){ appName=matchFromBoard(pk.board); }
     if(appName){
       _syncSeen[pid]=true;
       if(!DRAFT[appName]){ DRAFT[appName]='theirs'; ORDER.push(appName); tagged++; }
     } else {
-      missed.push(pk.name);
+      missed.push(pk.name||('playerId '+pk.playerId));
     }
   });
   if(tagged>0){ saveDraft(); refreshAll(); }
   if(tagged>0||missed.length){
-    console.log('[HotSause] sync: tagged '+tagged+' pick(s)'+(missed.length?'; no match for: '+missed.join(', '):''));
+    console.log('[HotSause] sync: tagged '+tagged+' pick(s)'+(missed.length?'; \u26a0 NO MATCH: '+missed.join(', '):''));
   }
 }
 window.addEventListener('hotsause:sync',function(e){
