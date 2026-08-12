@@ -300,7 +300,7 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
     <div class="filters" role="group" aria-label="Filter by position" style="margin:0">
       <button class="chip on" data-rpos="ALL">All</button><button class="chip" data-rpos="QB">QB</button>
       <button class="chip" data-rpos="RB">RB</button><button class="chip" data-rpos="WR">WR</button>
-      <button class="chip" data-rpos="TE">TE</button></div>
+      <button class="chip" data-rpos="TE">TE</button><button class="chip" data-rpos="DEF">DEF</button></div>
     <label class="pickpick"><span>Drafting at</span><select id="rbPick"></select></label>
   </div>
   <div class="rlegend"><em>Board pick = where he actually goes with keepers gone</em><em>Mkt = public ADP and its round in a normal 12-team draft</em><em>Value = keeper-adjusted VORP</em></div>
@@ -704,12 +704,21 @@ var TEAMS=12,KEEP=38;
 var keptADP=PLAYERS.filter(function(p){return !p.avail&&p.adp!=null}).map(function(p){return p.adp}).sort(function(a,b){return a-b});
 function roundOfLive(l){return Math.ceil((l+KEEP)/TEAMS)}
 avail.forEach(function(p){
+  if(p.isDef){return}
   if(p.adp==null){p.lp=null;return}
   var ahead=0;for(var i=0;i<keptADP.length;i++){if(keptADP[i]<p.adp)ahead++}
   p.lp=Math.max(1,Math.round(p.adp-ahead));
   p.rd=roundOfLive(p.lp);
   p.mr=Math.ceil(p.adp/TEAMS);
 });
+/* Position defenses on the board by VALUE RANK (no market ADP in this format).
+   Best defense anchors ~live pick 50 (~round 8, per this format's DEF premium),
+   each weaker unit steps ~7 picks later -> clean descending ladder DEN..BUF. */
+(function(){
+  var defs=avail.filter(function(p){return p.isDef}).sort(function(a,b){return b.kv-a.kv});
+  var ANCHOR=50, STEP=7;
+  defs.forEach(function(d,i){ d.lp=ANCHOR+i*STEP; d.rd=roundOfLive(d.lp); d.mr=null; });
+})();
 var MYPICKS=PICKS.map(function(x){return x[0]});
 var PICKLBL={};PICKS.forEach(function(x){PICKLBL[x[0]]=x[1]});
 var rbPos='ALL',rbPick=MYPICKS[0];
@@ -739,7 +748,7 @@ function bestFitNeeds(){
 }
 function renderRounds(){
   var fit=bestFitNeeds();
-  var pool=avail.filter(function(p){return p.lp!=null&&!isGone(p.n)&&(rbPos==='ALL'||p.p===rbPos)}).sort(function(a,b){return a.lp-b.lp});
+  var pool=avail.filter(function(p){var goneRB=p.isDef?(MYDEF===p.defTeam||poolGone(p)):isGone(p.n);return p.lp!=null&&!goneRB&&(rbPos==='ALL'||p.p===rbPos)}).sort(function(a,b){return a.lp-b.lp});
   var byR={};pool.forEach(function(p){(byR[p.rd]=byR[p.rd]||[]).push(p)});
   var rs={};Object.keys(byR).forEach(function(k){rs[+k]=1});MYPICKS.forEach(function(m){rs[roundOfLive(m)]=1});
   var keys=Object.keys(rs).map(Number).sort(function(a,b){return a-b});
@@ -774,15 +783,18 @@ function playerRow(p,nxt,fit){
   else{st='s-take';ver='Take now \u00b7 reach '+d}
   var isFit=fit&&fit[p.n];
   var tag=isFit?' <span class="fitpin">FILLS NEED</span>':'';
+  var posCell=p.isDef?'DEF':(p.p+p.prk);
+  var mktCell=p.isDef?'value pick':('ADP '+(p.adp==null?'\u2014':p.adp)+' \u00b7 mkt R'+p.mr);
+  var actCell=p.isDef?(MYDEF===p.defTeam?'<button class="btn-mine" data-undef="1">\u2713 My DEF</button>':'<button class="btn-mine" data-defpick="'+p.defTeam+'">My DEF</button>'):actBtns(p.n);
   return '<li class="prow '+st+(isFit?' s-fit':'')+'">'+
     '<span class="pk">'+p.lp+'</span>'+
     '<span class="pnm">'+esc(p.n)+tag+(p.note?'<i>'+esc(p.note)+'</i>':'')+'</span>'+
-    '<span class="ppos">'+p.p+p.prk+'</span>'+
+    '<span class="ppos">'+posCell+'</span>'+
     '<span class="ptm">'+p.t+'</span>'+
     '<span class="pval">'+p.kv.toFixed(0)+'</span>'+
-    '<span class="pmkt">ADP '+(p.adp==null?'\u2014':p.adp)+' \u00b7 mkt R'+p.mr+'</span>'+
+    '<span class="pmkt">'+mktCell+'</span>'+
     '<span class="pver">'+ver+'</span>'+
-    '<span class="pact">'+actBtns(p.n)+'</span></li>';
+    '<span class="pact">'+actCell+'</span></li>';
 }
 $$('[data-rpos]').forEach(function(c){c.addEventListener('click',function(){$$('[data-rpos]').forEach(function(x){x.classList.remove('on')});c.classList.add('on');rbPos=c.dataset.rpos;renderRounds()})});
 renderRounds();
