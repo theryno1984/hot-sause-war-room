@@ -136,10 +136,13 @@ td.sos.up{color:var(--glow-hot)}td.sos.down{color:var(--ember)}
 .prow.phead span{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ember);font-weight:400}
 .prow.phead:hover{background:rgba(255,255,255,.02)}
 .prow.phead .pver{border:0;padding:0;text-align:center}
-.prow{display:grid;grid-template-columns:52px minmax(160px,1.5fr) 62px 46px 64px 132px 168px;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid rgba(46,46,51,.55)}
+.prow{display:grid;grid-template-columns:52px minmax(150px,1.4fr) 58px 42px 56px 118px 132px 150px;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid rgba(46,46,51,.55)}
 .prow:hover{background:rgba(224,16,24,.05)}
 .prow.s-fit{background:rgba(14,58,24,.5);box-shadow:inset 3px 0 0 #1C6E33}
 .prow.s-fit:hover{background:rgba(14,58,24,.62)}
+.prow .pact{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.prow.phead .pact{justify-content:flex-end}
+.prow .pact .btn-draft,.prow .pact .btn-mine{padding:5px 9px;font-size:10px}
 .fitpin{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;color:#5BE08A;border:1px solid #1C6E33;border-radius:2px;padding:1px 5px;margin-left:7px;vertical-align:middle}
 .prow .pk{font-family:var(--mono);font-size:12px;color:var(--dim)}
 .prow .pnm{font-weight:600;letter-spacing:-.01em;font-size:14.5px;min-width:0}
@@ -159,12 +162,13 @@ td.sos.up{color:var(--glow-hot)}td.sos.down{color:var(--ember)}
 .rlegend em{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);border-radius:2px;padding:5px 9px;color:var(--dim)}
 @media (max-width:640px){.mark{height:74px}}
 @media (max-width:820px){
-  .prow{grid-template-columns:44px 1fr 56px;grid-template-areas:"pk nm pos" ". mkt mkt" ". ver ver";gap:4px 10px;padding:11px 14px}
+  .prow{grid-template-columns:44px 1fr 56px;grid-template-areas:"pk nm pos" ". mkt mkt" ". ver act";gap:4px 10px;padding:11px 14px}
   .prow .pk{grid-area:pk}.prow .pnm{grid-area:nm}.prow .ppos{grid-area:pos;text-align:right}
   .prow .ptm,.prow .pval{display:none}
   .prow.phead{display:none}
   .prow .pmkt{grid-area:mkt;padding-left:0}
   .prow .pver{grid-area:ver;justify-self:start;padding:4px 8px}
+  .prow .pact{grid-area:act;justify-content:flex-end;align-self:center}
   .roundjump{padding:10px 16px;margin:0 -16px 4px;top:52px}
   .rhead{top:100px;padding:12px}
   .rhead .rmine{margin-left:0;width:100%}
@@ -288,6 +292,10 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
 <section id="rounds" class="panel">
   <div class="rail"><p class="eyebrow">Round board</p><h2>Who goes in which round</h2>
   <p class="lede">Market ADP re-based onto our board. Thirty-eight keepers are already off the table, so every remaining player slides up roughly two and a half rounds from where the internet says he goes. Set your pick and each name gets a verdict: gone before you, take-him-now, or safe to wait one more turn.</p></div>
+  <div class="draftbar" style="position:static;top:auto">
+    <div class="lf"><input class="dsearch" id="rbsearch" type="search" placeholder="Type a player being drafted…" autocomplete="off" spellcheck="false"><div class="ac" id="rbAcList" role="listbox"></div></div>
+    <span class="dcount"><b id="rbGone">0</b> drafted · <b id="rbMine">0</b> mine · <span id="rbLeft">0</span> left</span>
+  </div>
   <div class="rbtop">
     <div class="filters" role="group" aria-label="Filter by position" style="margin:0">
       <button class="chip on" data-rpos="ALL">All</button><button class="chip" data-rpos="QB">QB</button>
@@ -746,7 +754,7 @@ function renderRounds(){
       (mine.length?'<span class="rmine">You are on the clock \u00b7 '+mine.map(function(m){return '#'+m}).join(' + ')+'</span>':'')+
       '</div>';
     if(!list.length){out+='<p class="rdry">Nothing left on the modelled board this deep. Anything here is a dart throw \u2014 handcuffs, rookie stashes, or a second defense.</p></div>';return}
-    var pending=mine.slice(),rows='<li class="prow phead"><span class="pk">Pick</span><span class="pnm">Player</span><span class="ppos">Pos</span><span class="ptm">Tm</span><span class="pval">Val</span><span class="pmkt">Market</span><span class="pver">Verdict</span></li>';
+    var pending=mine.slice(),rows='<li class="prow phead"><span class="pk">Pick</span><span class="pnm">Player</span><span class="ppos">Pos</span><span class="ptm">Tm</span><span class="pval">Val</span><span class="pmkt">Market</span><span class="pver">Verdict</span><span class="pact">Draft</span></li>';
     list.forEach(function(p){
       while(pending.length&&p.lp>=pending[0]){rows+=clockRow(pending.shift())}
       rows+=playerRow(p,nxt,fit);
@@ -773,7 +781,8 @@ function playerRow(p,nxt,fit){
     '<span class="ptm">'+p.t+'</span>'+
     '<span class="pval">'+p.kv.toFixed(0)+'</span>'+
     '<span class="pmkt">ADP '+(p.adp==null?'\u2014':p.adp)+' \u00b7 mkt R'+p.mr+'</span>'+
-    '<span class="pver">'+ver+'</span></li>';
+    '<span class="pver">'+ver+'</span>'+
+    '<span class="pact">'+actBtns(p.n)+'</span></li>';
 }
 $$('[data-rpos]').forEach(function(c){c.addEventListener('click',function(){$$('[data-rpos]').forEach(function(x){x.classList.remove('on')});c.classList.add('on');rbPos=c.dataset.rpos;renderRounds()})});
 renderRounds();
@@ -906,15 +915,19 @@ function renderCounts(){
   if($('#dGone'))$('#dGone').textContent=gone;
   if($('#dMine'))$('#dMine').textContent=mine;
   if($('#dLeft'))$('#dLeft').textContent=left;
+  if($('#rbGone'))$('#rbGone').textContent=gone;
+  if($('#rbMine'))$('#rbMine').textContent=mine;
+  if($('#rbLeft'))$('#rbLeft').textContent=left;
   var u=$('#btnUndo');if(u)u.disabled=ORDER.length===0;
 }
 function refreshAll(){
   cleanTiers(curCPos); renderPool(); renderRounds(); renderDef();
   renderNeedBar(); renderRoster(); renderTargets(); renderCounts();
 }
-/* ===== SEARCH TYPE-AHEAD ===== */
-(function(){
-  var box=$('#dsearch'),list=$('#acList');if(!box)return;
+/* ===== SEARCH TYPE-AHEAD (shared by Available Pool + Round Board) ===== */
+var _clearFns=[];
+function makeSearch(boxId,listId){
+  var box=$(boxId),list=$(listId);if(!box)return;
   function render(q){
     q=q.toLowerCase().trim();
     if(!q){list.innerHTML='';return}
@@ -925,9 +938,11 @@ function refreshAll(){
   box.addEventListener('input',function(){render(box.value)});
   box.addEventListener('focus',function(){render(box.value)});
   document.addEventListener('click',function(e){if(!box.contains(e.target)&&!list.contains(e.target))list.innerHTML=''});
-  function clearBox(){box.value='';list.innerHTML='';box.focus()}
-  window._clearSearch=clearBox;
-})();
+  _clearFns.push(function(){box.value='';list.innerHTML='';});
+}
+makeSearch('#dsearch','#acList');
+makeSearch('#rbsearch','#rbAcList');
+window._clearSearch=function(){_clearFns.forEach(function(f){f()})};
 /* ===== EVENT DELEGATION for all draft buttons ===== */
 document.addEventListener('click',function(e){
   var t=e.target;
