@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hot Sause — 2026 Draft War Room</title>
+<link rel="icon" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0A0A0B;--lacquer:#141416;--panel:#1C1C1F;--line:#2E2E33;--glow:#E0101A;--glow-hot:#FB1F2E;--glow-deep:#5A0714;--jade:#C8C8CE;--ember:#6E6E76;--bone:#F2F2F4;--dim:#8A8A93;--mono:"JetBrains Mono",ui-monospace,monospace;--display:"Oswald",sans-serif;--text:"Instrument Sans",system-ui,sans-serif}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ink);color:var(--bone);font-family:var(--text);font-size:16px;line-height:1.6;letter-spacing:-.005em;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.aura{position:fixed;inset:-30vh -20vw auto;height:90vh;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(224,16,24,.13),transparent 70%)}
+.masthead{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;padding:28px 32px 22px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:18px}
+.mark{height:92px;width:auto;flex:none;filter:drop-shadow(0 0 30px rgba(224,16,24,.5));display:block}
+.word h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,5.4vw,46px);line-height:.92;margin:0;letter-spacing:.06em;text-transform:uppercase;color:var(--bone)}
+.word h1 em{font-style:normal;color:var(--glow);text-shadow:0 0 24px rgba(224,16,24,.65)}
+.word p{margin:7px 0 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.countdown{text-align:right}
+.countdown strong{display:block;font-family:var(--display);font-weight:600;font-size:34px;color:var(--glow);line-height:1.1;letter-spacing:.02em}
+.countdown .lbl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.tabs{position:sticky;top:0;z-index:5;display:flex;gap:2px;overflow-x:auto;padding:0 32px;background:rgba(10,10,11,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;appearance:none;background:none;border:0;cursor:pointer;font-family:var(--display);font-weight:500;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:16px 18px;border-bottom:2px solid transparent;transition:color .15s}
+.tabs button:hover{color:var(--bone)}
+.tabs button[aria-selected=true]{color:var(--glow);border-bottom-color:var(--glow)}
+.tabs button:focus-visible,.chip:focus-visible,input:focus-visible{outline:2px solid var(--glow-hot);outline-offset:2px}
+main{position:relative;z-index:1;padding:0 32px 80px;max-width:1180px;margin:0 auto}
+.panel{display:none;padding-top:40px}
+.panel.active{display:block;animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.rail{max-width:70ch;margin-bottom:26px}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--glow);margin:0 0 10px}
+h2{font-family:var(--text);font-weight:600;font-size:clamp(25px,3.7vw,36px);line-height:1.12;margin:0 0 12px;letter-spacing:-.03em}
+h3{font-family:var(--text);font-weight:600;font-size:17.5px;margin:0 0 10px;letter-spacing:-.02em}
+.lede{color:var(--dim);margin:0;font-size:16.5px;line-height:1.6}
+.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.chip{appearance:none;cursor:pointer;background:var(--panel);color:var(--dim);border:1px solid var(--line);border-radius:2px;padding:7px 16px;font-family:var(--display);font-weight:500;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.chip:hover{color:var(--bone)}
+.chip.on{background:var(--glow);color:#0A0A0B;border-color:var(--glow);font-weight:600}
+.search input{background:var(--panel);border:1px solid var(--line);border-radius:2px;color:var(--bone);padding:8px 14px;font-family:var(--mono);font-size:13px;min-width:220px}
+.search input::placeholder{color:#5A5A62}
+.tablewrap{border:1px solid var(--line);border-radius:3px;overflow:auto;max-height:74vh;background:var(--lacquer)}
+.tablewrap.narrow{max-height:none}
+table.board{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
+table.board thead th{position:sticky;top:0;z-index:2;background:var(--panel);color:var(--dim);font-family:var(--mono);font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase;text-align:left;padding:12px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+th.num,td.num,th.c,td.c{text-align:right}th.c,td.c{text-align:center}
+table.board tbody td{padding:9px 12px;border-bottom:1px solid rgba(46,46,51,.6);vertical-align:middle}
+table.board tbody tr:hover{background:rgba(224,16,24,.06)}
+td.rk{font-family:var(--mono);color:var(--dim);font-size:12px}
+td.name{font-weight:600;letter-spacing:-.01em}
+td.pos{font-family:var(--mono);font-size:11px;color:var(--dim)}
+td.num{font-family:var(--mono);font-size:13px}
+.up{color:var(--glow-hot)}.down{color:var(--ember)}
+td.vcell{width:200px;min-width:150px}
+.bar{position:relative;height:20px;background:rgba(255,255,255,.04);border-radius:1px}
+.bar i{position:absolute;inset:0 auto 0 0;display:block;border-radius:1px;background:linear-gradient(90deg,#6B0A12,var(--glow));box-shadow:0 0 14px rgba(224,16,24,.45)}
+.bar b{position:absolute;right:7px;top:0;line-height:20px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--bone)}
+.foot{color:var(--dim);font-size:13.5px;margin-top:14px;max-width:75ch;line-height:1.6}
+.tiers{display:grid;gap:14px}
+.tierblock{border:1px solid var(--line);border-left:3px solid var(--glow);background:var(--lacquer);padding:16px 18px;border-radius:2px}
+.tierblock h4{margin:0 0 10px;font-family:var(--display);font-weight:600;font-size:14px;color:var(--glow);letter-spacing:.18em;text-transform:uppercase}
+.tierblock ul{margin:0;padding:0;list-style:none;display:grid;gap:5px}
+.tierblock li{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:14.5px}
+.tierblock li b{min-width:180px;font-weight:600;letter-spacing:-.01em}
+.tierblock li span{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.tierblock li em{font-style:normal;color:var(--dim);font-size:13.5px}
+.cliffbar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:2px;font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase}
+.cliffbar.major{background:rgba(224,16,24,.18);border:1px solid var(--glow);color:#FF5F4A}
+.cliffbar.mod{background:rgba(224,16,24,.08);border:1px solid rgba(224,16,24,.4);color:#D9705C}
+.cliffbar.low{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--dim)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:22px}
+.card{background:var(--lacquer);border:1px solid var(--line);border-radius:3px;padding:20px 22px}
+.card.wide{grid-column:1/-1}
+.card p{margin:0 0 10px;color:var(--dim);font-size:15px;line-height:1.62}
+.card p.tail{margin:12px 0 0;color:var(--glow-hot);font-size:13.5px}
+.rates{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;margin:0;font-size:14.5px}
+.rates dt{font-family:var(--mono);font-size:12px;color:var(--bone)}
+.rates dd{margin:0;color:var(--dim)}.rates dd b{color:var(--glow-hot)}
+table.mini{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 2px}
+table.mini th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);text-align:right;font-weight:500;padding:6px 8px;border-bottom:1px solid var(--line)}
+table.mini th:first-child{text-align:left}
+table.mini td{padding:7px 8px;text-align:right;border-bottom:1px solid rgba(46,46,51,.55);font-family:var(--mono);font-size:12.5px}
+table.mini td:first-child{text-align:left;font-family:var(--text);color:var(--dim)}
+table.mini td.hot{color:var(--glow-hot);font-weight:700}
+.equation{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:34px 20px;border:1px solid var(--line);border-radius:3px;background:var(--lacquer);margin-bottom:22px}
+.equation span{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
+.equation strong{font-family:var(--display);font-weight:600;font-size:clamp(46px,10vw,88px);color:var(--glow);text-shadow:0 0 44px rgba(224,16,24,.5);line-height:1;letter-spacing:.02em}
+.league{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.team{background:var(--lacquer);border:1px solid var(--line);border-radius:3px;padding:18px 20px}
+.team h4{margin:0;font-family:var(--text);font-weight:600;font-size:16px;letter-spacing:-.02em}
+.team .place{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:4px 0 14px}
+.team ol{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:13.5px}
+.team li{display:flex;gap:10px;align-items:baseline}
+.team li .slot{font-family:var(--mono);font-size:10px;color:var(--dim);min-width:32px}
+.team li .val{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.team li.bench{opacity:.6}
+footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:26px 32px 40px;max-width:1180px;margin:0 auto}
+footer p{margin:0 0 6px;color:var(--dim);font-size:12.5px;max-width:80ch;line-height:1.6}
+footer .stamp{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+h3.sub{font-family:var(--text);font-weight:600;font-size:21px;margin:36px 0 14px;letter-spacing:-.025em}
+td.sos{font-size:12px;color:var(--dim);max-width:290px}
+td.sos.up{color:var(--glow-hot)}td.sos.down{color:var(--ember)}
+.card.alert{border-left:3px solid var(--glow)}
+.team.me{border-color:var(--glow);box-shadow:0 0 30px -10px var(--glow)}
+.thead{display:flex;align-items:center;gap:10px}
+.slot-badge{font-family:var(--mono);font-size:10px;letter-spacing:.1em;background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:3px 7px;color:var(--glow);flex:none}
+.team li.kept{color:var(--glow-hot)}
+.keepmark{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:#0A0A0B;background:var(--glow);border-radius:2px;padding:1px 5px;margin-left:7px}
+.team .place b{font-weight:700}
+@media (max-width:640px){.masthead{padding:20px}main{padding:0 16px 60px}.tabs{padding:0 10px}.countdown{text-align:left}.tierblock li b{min-width:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ===== ROUND BOARD ===== */
+.rbtop{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.pickpick{display:flex;align-items:center;gap:10px}
+.pickpick span{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.pickpick select{background:var(--panel);border:1px solid var(--glow);border-radius:2px;color:var(--bone);padding:8px 12px;font-family:var(--mono);font-size:13px}
+.roundjump{position:sticky;top:52px;z-index:4;display:flex;gap:5px;overflow-x:auto;padding:11px 32px;margin:0 -32px 4px;background:rgba(10,10,11,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);scrollbar-width:none}
+.roundjump::-webkit-scrollbar{display:none}
+.roundjump a{flex:none;text-decoration:none;font-family:var(--display);font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line);border-radius:2px;padding:5px 11px;background:var(--lacquer);transition:color .15s,border-color .15s}
+.roundjump a:hover{color:var(--bone);border-color:var(--glow)}
+.roundjump a.mine{color:var(--glow-hot);border-color:rgba(224,16,24,.55);background:rgba(224,16,24,.09)}
+.rblock{border-top:1px solid var(--line);margin-top:34px;scroll-margin-top:150px}
+.rblock:first-child{margin-top:6px}
+.rhead{position:sticky;top:104px;z-index:3;display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px;padding:14px 16px;background:linear-gradient(180deg,rgba(20,20,22,.98),rgba(20,20,22,.93));border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+.rhead .rnum{font-family:var(--display);font-weight:700;font-size:27px;letter-spacing:.1em;text-transform:uppercase;color:var(--bone);line-height:1}
+.rhead .rmeta{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.rhead .rmine{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--glow-hot);border:1px solid rgba(224,16,24,.5);background:rgba(224,16,24,.12);border-radius:2px;padding:5px 10px;white-space:nowrap}
+.rlist{list-style:none;margin:0;padding:0}
+.prow.phead{padding:7px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+.prow.phead span{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ember);font-weight:400}
+.prow.phead:hover{background:rgba(255,255,255,.02)}
+.prow.phead .pver{border:0;padding:0;text-align:center}
+.prow{display:grid;grid-template-columns:52px minmax(160px,1.5fr) 62px 46px 64px 132px 168px;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid rgba(46,46,51,.55)}
+.prow:hover{background:rgba(224,16,24,.05)}
+.prow .pk{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.prow .pnm{font-weight:600;letter-spacing:-.01em;font-size:14.5px;min-width:0}
+.prow .pnm i{display:block;font-style:normal;font-size:11.5px;color:var(--dim);font-weight:400;letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow .ppos,.prow .ptm{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.prow .pval{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--bone);text-align:right}
+.prow .pmkt{font-family:var(--mono);font-size:11px;color:var(--dim);padding-left:8px}
+.prow .pver{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;border-radius:2px;padding:5px 8px;text-align:center;border:1px solid transparent}
+.s-gone .pver{color:var(--ember);border-color:var(--line)}
+.s-gone .pnm,.s-gone .pval{color:var(--ember)}
+.s-take .pver{color:var(--glow-hot);border-color:rgba(224,16,24,.55);background:rgba(224,16,24,.13)}
+.s-wait .pver{color:var(--bone);border-color:var(--line);background:rgba(255,255,255,.04)}
+.clockrow{display:flex;align-items:center;gap:14px;padding:11px 16px;background:linear-gradient(90deg,rgba(224,16,24,.22),rgba(224,16,24,.02));border-top:1px solid var(--glow);border-bottom:1px solid var(--glow);font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--glow-hot)}
+.clockrow b{font-family:var(--display);font-size:16px;letter-spacing:.1em;color:var(--bone)}
+.rdry{padding:18px 16px;color:var(--dim);font-size:14px}
+.rlegend{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.rlegend em{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);border-radius:2px;padding:5px 9px;color:var(--dim)}
+@media (max-width:640px){.mark{height:74px}}
+@media (max-width:820px){
+  .prow{grid-template-columns:44px 1fr 56px;grid-template-areas:"pk nm pos" ". mkt mkt" ". ver ver";gap:4px 10px;padding:11px 14px}
+  .prow .pk{grid-area:pk}.prow .pnm{grid-area:nm}.prow .ppos{grid-area:pos;text-align:right}
+  .prow .ptm,.prow .pval{display:none}
+  .prow.phead{display:none}
+  .prow .pmkt{grid-area:mkt;padding-left:0}
+  .prow .pver{grid-area:ver;justify-self:start;padding:4px 8px}
+  .roundjump{padding:10px 16px;margin:0 -16px 4px;top:52px}
+  .rhead{top:100px;padding:12px}
+  .rhead .rmine{margin-left:0;width:100%}
+}
+.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+.sortable:hover{color:var(--bone)}
+th.sortable .caret{display:inline-block;width:0;height:0;margin-left:5px;vertical-align:middle;opacity:.35;border-left:4px solid transparent;border-right:4px solid transparent}
+th.sortable.asc .caret{opacity:1;border-bottom:5px solid var(--glow);border-top:0}
+th.sortable.desc .caret{opacity:1;border-top:5px solid var(--glow);border-bottom:0}
+th.sortable.active{color:var(--glow)}
+/* ===== LIVE DRAFT ===== */
+.draftbar{position:sticky;top:52px;z-index:6;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:12px 16px;margin:0 0 18px;background:linear-gradient(180deg,rgba(20,20,22,.98),rgba(20,20,22,.9));border:1px solid var(--line);border-radius:3px;backdrop-filter:blur(8px)}
+.draftbar .lf{position:relative;flex:1 1 320px;min-width:240px}
+.draftbar input.dsearch{width:100%;background:var(--panel);border:1px solid var(--glow);border-radius:2px;color:var(--bone);padding:11px 14px;font-family:var(--mono);font-size:14px}
+.draftbar input.dsearch::placeholder{color:#5A5A62}
+.dcount{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.dcount b{color:var(--glow-hot)}
+.ac{position:absolute;top:calc(100% + 5px);left:0;right:0;z-index:20;background:var(--lacquer);border:1px solid var(--glow);border-radius:3px;max-height:340px;overflow:auto;box-shadow:0 18px 40px -12px #000}
+.ac:empty{display:none}
+.acrow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid rgba(46,46,51,.5)}
+.acrow:last-child{border-bottom:0}
+.acrow:hover{background:rgba(224,16,24,.06)}
+.acrow .acn{font-weight:600;font-size:14px;letter-spacing:-.01em}
+.acrow .acn small{display:block;font-family:var(--mono);font-weight:400;font-size:10.5px;color:var(--dim);letter-spacing:.04em}
+.btn-draft,.btn-mine{appearance:none;cursor:pointer;font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;padding:6px 11px;border:1px solid;white-space:nowrap;transition:filter .12s}
+.btn-draft{background:var(--panel);color:var(--dim);border-color:var(--line)}
+.btn-draft:hover{filter:brightness(1.4);color:var(--bone)}
+.btn-mine{background:#0E3A18;color:#5BE08A;border-color:#1C6E33}
+.btn-mine:hover{filter:brightness(1.3)}
+td.act{white-space:nowrap;text-align:right;width:1%}
+td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5px}
+.draftctl{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:26px 16px 8px;margin-top:20px;border-top:1px solid var(--line)}
+.btn-undo,.btn-reset{appearance:none;cursor:pointer;font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;border-radius:2px;padding:11px 20px;border:1px solid}
+.btn-undo{background:var(--panel);color:var(--bone);border-color:var(--line)}
+.btn-undo:hover{border-color:var(--glow);color:var(--glow-hot)}
+.btn-undo:disabled{opacity:.4;cursor:not-allowed}
+.btn-reset{background:transparent;color:var(--ember);border-color:var(--line)}
+.btn-reset:hover{color:var(--glow-hot);border-color:var(--glow)}
+.btn-reset.arm{background:var(--glow);color:#0A0A0B;border-color:var(--glow)}
+/* needs banner */
+.needbar{border:1px solid var(--glow);border-left:3px solid var(--glow);background:linear-gradient(180deg,rgba(224,16,24,.10),rgba(224,16,24,.02));border-radius:3px;padding:18px 22px;margin-bottom:22px}
+.needbar .nlab{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin:0 0 8px}
+.needbar h3.big{font-family:var(--display);font-weight:700;font-size:clamp(24px,4vw,34px);letter-spacing:.04em;text-transform:uppercase;color:var(--glow-hot);margin:0 0 6px;line-height:1}
+.needbar p{margin:8px 0 0;color:var(--dim);font-size:14.5px;line-height:1.55;max-width:80ch}
+.needgrid{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.needpill{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);border-radius:2px;padding:5px 10px;color:var(--dim)}
+.needpill.open{border-color:var(--glow);color:var(--glow-hot);background:rgba(224,16,24,.1)}
+.needpill.filled{opacity:.55}
+.needpill b{color:var(--bone);font-weight:600}
+/* my team roster */
+.rosterwrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.rgroup{background:var(--lacquer);border:1px solid var(--line);border-radius:3px;padding:14px 16px}
+.rgroup h4{margin:0 0 10px;font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--glow)}
+.rgroup ol{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.rgroup li{display:flex;gap:9px;align-items:baseline;font-size:14px;padding:4px 0;border-bottom:1px solid rgba(46,46,51,.4)}
+.rgroup li:last-child{border-bottom:0}
+.rgroup li .rslot{font-family:var(--mono);font-size:10px;color:var(--dim);min-width:34px}
+.rgroup li .rnm{font-weight:600;letter-spacing:-.01em}
+.rgroup li .rv{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.rgroup li.empty .rnm{color:var(--ember);font-weight:400;font-style:italic}
+.rgroup li.keepseed .rnm{color:var(--glow-hot)}
+.kbadge{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:#0A0A0B;background:var(--glow);border-radius:2px;padding:1px 5px;margin-left:6px}
+/* war room targets */
+.targets{display:grid;gap:8px;margin:6px 0 4px}
+.tgt{display:grid;grid-template-columns:30px 1fr auto auto;align-items:center;gap:12px;padding:11px 14px;background:var(--lacquer);border:1px solid var(--line);border-left:3px solid var(--glow);border-radius:2px}
+.tgt .trank{font-family:var(--display);font-weight:700;font-size:19px;color:var(--glow);text-align:center}
+.tgt .tnm{font-weight:600;letter-spacing:-.01em;font-size:15px}
+.tgt .tnm small{display:block;font-family:var(--mono);font-weight:400;font-size:10.5px;color:var(--dim);letter-spacing:.03em;margin-top:2px}
+.tgt .tval{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--glow-hot);text-align:right}
+.tgt .tbtns{display:flex;gap:6px}
+.tgt.dimmed{opacity:.4}
+.emptytgt{padding:16px;color:var(--dim);font-size:14px;font-style:italic}
+
+</style>
+</head>
+<body>
+<div class="aura" aria-hidden="true"></div>
+<header class="masthead">
+  <div class="brand">
+    <img class="mark" src="/logo.png" alt="Hot Sause emblem" width="224" height="180">
+    <div class="word"><h1>HOT <em>SAUSE</em></h1><p>3-time champion · going for 4</p></div>
+  </div>
+  <div class="countdown"><span class="lbl">Draft</span><strong id="clock">—</strong><span class="lbl">Sun Sep 6 · slot 9 · first pick #31</span></div>
+</header>
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button role="tab" aria-selected="true" data-tab="clean">Tier Rankings</button>
+  <button role="tab" aria-selected="false" data-tab="pool">Available Pool</button>
+  <button role="tab" aria-selected="false" data-tab="rounds">Round Board</button>
+  <button role="tab" aria-selected="false" data-tab="warroom">War Room</button>
+  <button role="tab" aria-selected="false" data-tab="def">Defense</button>
+  <button role="tab" aria-selected="false" data-tab="scoring">Scoring</button>
+  <button role="tab" aria-selected="false" data-tab="league">League</button>
+  <button role="tab" aria-selected="false" data-tab="keepers">My Team</button>
+</nav>
+<main>
+<section id="clean" class="panel active">
+  <div class="rail"><p class="eyebrow">Clean board</p><h2>Tier rankings, every player</h2>
+  <p class="lede">The whole player universe scored under our rules. No keepers removed, no draft context — just who is good and where the cliffs are. Use this for trades, waivers, and any season.</p></div>
+  <div class="filters" role="group" aria-label="Choose position">
+    <button class="chip on" data-cpos="RB">RB</button><button class="chip" data-cpos="WR">WR</button>
+    <button class="chip" data-cpos="QB">QB</button><button class="chip" data-cpos="TE">TE</button></div>
+  <div id="cleanWrap" class="tiers"></div>
+  <h3 class="sub">Overall top 100</h3>
+  <div class="tablewrap"><table class="board"><thead><tr><th class="num">#</th><th>Player</th><th class="c">Pos</th><th class="c">Tm</th><th class="num">Pts</th><th class="num">VORP</th><th class="num">ADP</th><th class="num">Edge</th><th class="num">Fmt</th></tr></thead><tbody id="cleanOverall"></tbody></table></div>
+  <p class="foot">Edge = ADP minus our rank; positive means the market is selling him cheap. Fmt = spots gained or lost purely from our scoring rules versus conventional half-PPR.</p>
+</section>
+<section id="pool" class="panel">
+  <div class="draftbar">
+    <div class="lf"><input class="dsearch" id="dsearch" type="search" placeholder="Type a player being drafted…" autocomplete="off" spellcheck="false"><div class="ac" id="acList" role="listbox"></div></div>
+    <span class="dcount"><b id="dGone">0</b> drafted · <b id="dMine">0</b> mine · <span id="dLeft">0</span> left</span>
+  </div>
+  <div class="rail"><p class="eyebrow">Draft board</p><h2>What is actually available</h2>
+  <p class="lede">All 38 declared keepers removed, replacement levels re-solved on the remaining pool, schedule adjustment applied. This is the board that matters on September 6.</p></div>
+  <div class="controls"><div class="filters" role="group" aria-label="Filter by position">
+    <button class="chip on" data-apos="ALL">All</button><button class="chip" data-apos="QB">QB</button>
+    <button class="chip" data-apos="RB">RB</button><button class="chip" data-apos="WR">WR</button>
+    <button class="chip" data-apos="TE">TE</button></div>
+    <label class="search"><span class="sr">Search players</span><input id="aq" type="search" placeholder="Find a player…" autocomplete="off"></label></div>
+  <div class="tablewrap"><table class="board"><thead><tr><th class="num">#</th><th>Player</th><th class="c">Pos</th><th class="c">Tm</th><th class="vcol sortable" data-sort="kv">Value <span class="caret"></span></th><th class="num sortable" data-sort="adp">ADP <span class="caret"></span></th><th>Schedule flag</th></tr></thead><tbody id="poolBody"></tbody></table></div>
+</section>
+<section id="rounds" class="panel">
+  <div class="rail"><p class="eyebrow">Round board</p><h2>Who goes in which round</h2>
+  <p class="lede">Market ADP re-based onto our board. Thirty-eight keepers are already off the table, so every remaining player slides up roughly two and a half rounds from where the internet says he goes. Set your pick and each name gets a verdict: gone before you, take-him-now, or safe to wait one more turn.</p></div>
+  <div class="rbtop">
+    <div class="filters" role="group" aria-label="Filter by position" style="margin:0">
+      <button class="chip on" data-rpos="ALL">All</button><button class="chip" data-rpos="QB">QB</button>
+      <button class="chip" data-rpos="RB">RB</button><button class="chip" data-rpos="WR">WR</button>
+      <button class="chip" data-rpos="TE">TE</button></div>
+    <label class="pickpick"><span>Drafting at</span><select id="rbPick"></select></label>
+  </div>
+  <div class="rlegend"><em>Board pick = where he actually goes with keepers gone</em><em>Mkt = public ADP and its round in a normal 12-team draft</em><em>Value = keeper-adjusted VORP</em></div>
+  <nav class="roundjump" id="roundJump" aria-label="Jump to round"></nav>
+  <div id="roundBody"></div>
+</section>
+
+<section id="warroom" class="panel">
+  <div class="rail"><p class="eyebrow">Draft plan</p><h2>Thirteen picks, ten that matter</h2></div>
+  <div class="rail" style="margin-top:8px"><p class="eyebrow" style="color:var(--glow-hot)">Live targets</p><h3 style="margin:0 0 4px">Five best picks on the board right now</h3>
+  <p class="lede" style="font-size:15px">Ranked by keeper-adjusted value, filtered to what you still need. Updates the moment anyone is tagged. Draft one straight from here.</p></div>
+  <div class="targets" id="tgtList"></div>
+  <div class="cards"><article class="card wide alert"><h3>The two trades cost you the top of the draft</h3>
+  <p>Round 5 went to Cecil for Jalen Hurts. Round 12 went to We Be Illin'. Back came two Round 17s. Your first live selection is <b>active pick #31</b> rather than #19, and three of your thirteen picks sit in the final round.</p>
+  <p class="tail">Keeping four is now correct by 20 VORP. Even at pick #11 the best player on the board averages +46 — less than Bowers at +64.</p></article></div>
+  <div class="tablewrap narrow"><table class="board"><thead><tr><th class="num">Pick</th><th>Round</th><th>Plan</th></tr></thead><tbody id="pickBody"></tbody></table></div>
+  <div class="cards">
+    <article class="card"><h3>Skill first, quarterback second</h3><p>Taking the best runner or receiver at #31 and the quarterback at #43 beats the reverse by roughly 14 points. The skill board falls from +34 to +17 to +6 across your first three picks. Quarterback decay between #31 and #43 is zero.</p><p class="tail">Goff survives to #43 in 84% of simulations. At #55 a tier-2 quarterback is there only 2% of the time — that is a cliff, not a slope.</p></article>
+    <article class="card"><h3>The running back pool is gone before you pick</h3><p>Seven of the eight teams ahead of you need a back, and two of them kept none at all. The model has roughly thirteen backs off the board in the eighteen picks before your first.</p><p class="tail">That is why McCaffrey and Walker are worth more than their raw numbers suggest — the realistic alternative at your pick is a +40 back, not a +90 one.</p></article>
+    <article class="card"><h3>Who still needs a quarterback</h3><p>Eight of twelve teams, including the three picking immediately after you every round. But only about 1.5 quarterbacks go in the eleven picks between your first and second selection, because those same teams are starving at running back and receiver.</p><p class="tail">Average board exit: Hurts #30, Prescott #34, Goff #46, Stafford #54, Nix #60.</p></article>
+  </div>
+</section>
+<section id="def" class="panel">
+  <div class="rail"><p class="eyebrow">Team defense</p><h2>Worth a real pick in this format</h2>
+  <p class="lede">Sacks pay 2 and interceptions pay 3 here, both above standard. That widens the spread enough that the top defense is worth more than the best quarterback available.</p></div>
+  <div class="cards"><article class="card wide"><h3>The numbers that justify drafting one early</h3>
+  <table class="mini"><tr><th>Asset</th><th>Value over replacement</th></tr>
+  <tr><td>Top defense over DEF12 (last starter)</td><td class="hot">+75</td></tr>
+  <tr><td>Top defense over DEF18 (freely available)</td><td class="hot">+97</td></tr>
+  <tr><td>Jared Goff, our QB3</td><td>+43</td></tr>
+  <tr><td>Best runner or receiver at pick #43</td><td>+17</td></tr>
+  <tr><td>Best runner or receiver at pick #67</td><td>+2</td></tr></table>
+  <p class="tail">With rolling waivers rather than FAAB you get roughly one meaningful claim per season, so streaming a defense is expensive here in a way it is not in most leagues. Locking a top unit around pick #67 is defensible.</p></article></div>
+  <div class="tablewrap"><table class="board"><thead><tr><th class="num">#</th><th>Team</th><th class="num">2026 proj</th><th class="num">2025 actual</th><th class="num">Personnel</th><th class="num">SOS</th><th>Notes</th><th class="c">Draft</th></tr></thead><tbody id="defBody"></tbody></table></div>
+  <p class="foot">2025 sacks, interceptions, fumble recoveries, defensive touchdowns and points allowed are verified. Personnel and schedule adjustments are model estimates. An Aaron Donald return is treated as speculation and is not counted.</p>
+</section>
+<section id="scoring" class="panel">
+  <div class="rail"><p class="eyebrow">The math</p><h2>Why nobody else's rankings work here</h2></div>
+  <div class="cards">
+    <article class="card"><h3>Exchange rates</h3><dl class="rates">
+      <dt>1 reception</dt><dd>0.50 — worth 7.5 receiving yds</dd>
+      <dt>1 rushing yard</dt><dd>0.100 — <b>1.5&times;</b> a receiving yard</dd>
+      <dt>1 receiving yard</dt><dd>0.067 — a 33% haircut vs standard</dd>
+      <dt>1 passing yard</dt><dd>0.033</dd>
+      <dt>1 completion</dt><dd>+0.50 — each incompletion is <b>&minus;0.50</b></dd>
+      <dt>1 sack taken</dt><dd>&minus;1.00 — 47 sacks is &minus;47 points</dd>
+      <dt>1 interception</dt><dd>&minus;3.00</dd>
+      <dt>Any touchdown</dt><dd>6.00 — worth 90 receiving yds</dd></dl></article>
+    <article class="card"><h3>The flexes fill backwards</h3><p>Solving optimal starters across 12 teams: the W/R flex takes a running back on every team and the W/T takes a receiver on every team. The receiving-yard haircut does it.</p>
+      <table class="mini"><tr><th></th><th>Ours</th><th>Standard</th></tr>
+      <tr><td>RB replacement</td><td class="hot">RB36</td><td>RB33</td></tr>
+      <tr><td>WR replacement</td><td class="hot">WR36</td><td>WR39</td></tr>
+      <tr><td>TE replacement</td><td class="hot">TE12</td><td>TE12</td></tr></table>
+      <p class="tail">Running back is the scarce commodity here. Not wide receiver.</p></article>
+    <article class="card wide"><h3>Quarterback is the widest position on the board</h3><p>2025 actuals, passing only. The completion-minus-incompletion mechanic rewards accurate high-volume passers and punishes sacks and interceptions harder than any mainstream format.</p>
+      <table class="mini"><tr><th></th><th>QB1</th><th>QB6</th><th>QB12</th><th>QB1 to QB12</th></tr>
+      <tr><td>Our scoring</td><td>28.0</td><td>21.7</td><td>17.7</td><td class="hot">10.3 / game — 175 per season</td></tr>
+      <tr><td>Standard</td><td>21.0</td><td>16.3</td><td>14.2</td><td>6.8 / game — 116 per season</td></tr></table>
+      <p class="tail">A Goff to St. Brown touchdown pays twice in this format: 6 for the pass, 6 for the catch, plus a completion, a reception and yards on both sides. Stacking is worth more here than anywhere else.</p></article>
+  </div>
+</section>
+<section id="league" class="panel">
+  <div class="rail"><p class="eyebrow">All twelve rosters</p><h2>38 keepers, draft order reverse of finish</h2>
+  <p class="lede">Slot order runs from last place to first. Keepers are marked. Teams missing a position entirely are flagged — those are the ones who chase hardest early.</p></div>
+  <div class="equation"><span>my first live pick</span><strong>57 &minus; K</strong><span>K = 38 &rarr; pick #31</span></div>
+  <div id="leagueWrap" class="league"></div>
+</section>
+<section id="keepers" class="panel">
+  <div class="rail"><p class="eyebrow">Live roster</p><h2>My team, building in real time</h2>
+  <p class="lede">Four keepers seed the roster. Every pick you tag “My Pick” fills the best open slot automatically. The banner tracks your biggest hole under our scoring — no second tight end, no second quarterback.</p></div>
+  <div id="needBar"></div>
+  <h3 class="sub">Starting lineup &amp; bench</h3>
+  <div id="rosterWrap" class="rosterwrap"></div>
+  <h3 class="sub">Keeper grades</h3>
+  <div id="myWrap" class="cards"></div>
+</section>
+<div class="draftctl">
+  <button class="btn-undo" id="btnUndo" disabled>↩ Undo last pick</button>
+  <button class="btn-reset" id="btnReset">Reset draft</button>
+</div>
+</main>
+<footer>
+<p>Built for one league. 2025 production from Pro-Football-Reference. 2026 opportunity, touchdown-regression and personnel adjustments are model estimates. Positional strength of schedule is derived from published 2025 fantasy points allowed and weighted deliberately small. Weeks 16–17 playoff schedule is not yet modelled. No kickers, by standing rule.</p>
+<p class="stamp">Last build 11 Aug 2026</p>
+</footer>
+<script>
+const ROWS=`
+Jahmyr Gibbs~RB~DET~307~187.9~1~1~1~1~0~16.5~Montgomery aging; new OC~0~~
+Bijan Robinson~RB~ATL~294~175.3~2~2~2~2~0~16.5~Workhorse, 80% of rush share~0~~
+De'Von Achane~RB~MIA~271~152.0~3~3~3~14~1~16~~0~~
+Jonathan Taylor~RB~IND~269~149.7~3~4~4~8~1~16~18 rush TD unrepeatable~0~~
+Omarion Hampton~RB~LAC~261~141.9~3~5~5~15~2~15.5~9 games; workhorse profile~0~~
+Christian McCaffrey~RB~SF~245~126.4~4~6~6~6~3~14.5~Age 30, 450 touches, 3.9 YPC~0~~
+Puka Nacua~WR~LAR~245~124.6~1~7~1~4~-4~15.5~129 rec = format-protected~0~~
+James Cook~RB~BUF~238~118.7~4~8~7~9~3~16~Rush title; Allen vultures TDs~0~~
+Drake Maye~QB~NE~441~114.7~1~9~1~59~6~16.5~72% cmp; AJ Brown added~0~~
+Ashton Jeanty~RB~LV~227~107.5~5~10~8~10~3~16.5~3.7 YPC rookie yr; Kubiak scheme~0~~
+Ja'Marr Chase~WR~CIN~224~103.6~2~11~2~3~-3~16~Burrow healthy = TD rebound~0~~
+Cam Skattebo~RB~NYG~221~101.6~5~12~9~41~2~14.5~Only 8 games; goal-line role~0~~
+Jaxon Smith-Njigba~WR~SEA~220~99.1~2~13~3~5~-7~16.5~OPoY; 105.5 yd/g~0~~
+Chase Brown~RB~CIN~217~98.3~5~14~10~16~3~16~Burrow health lifts scoring env~0~~
+Kenneth Walker III~RB~KC~211~92.3~5~15~11~17~5~16~KC feature back; 5 TD on 252 touches was the outlier~0~~
+Derrick Henry~RB~BAL~211~91.9~5~16~12~19~10~15.5~Age 32; zero receiving = format-neutral~0~~
+TreVeyon Henderson~RB~NE~208~89.5~5~17~13~56~8~16~Only 4 starts; Stevenson still there~1~87.4~team slate punishing
+Bucky Irving~RB~TB~208~88.9~5~18~14~53~3~15~1 rush TD in 10g; Gainwell added~1~88.9~
+Amon-Ra St. Brown~WR~DET~204~83.2~3~19~4~7~-9~16.5~LaPorta back caps RZ; 117 rec protects him~0~~
+Josh Jacobs~RB~GB~202~82.6~5~20~15~36~7~15.5~13 rush TD regression~0~~
+Josh Allen~QB~BUF~409~82.5~2~21~2~27~-5~16.5~Elite rush floor~0~~
+Trey McBride~TE~ARI~186~80.3~1~22~1~23~-10~16.5~126 rec = best format profile at TE~0~~
+Kyren Williams~RB~LAR~199~79.7~5~23~16~31~7~16~Blake Corum pressure~0~~
+Breece Hall~RB~NYJ~197~77.9~5~24~17~32~4~16~5 total TD absurdly low; Geno upgrade~1~77.9~
+Javonte Williams~RB~DAL~195~75.9~5~25~18~35~9~16~3.9 Y/R receiving = format poison~1~81.8~RB slate top-5 EASIEST
+Saquon Barkley~RB~PHI~191~72.3~5~26~19~13~7~15.5~Post-400-touch regression already hit~0~~
+Travis Etienne~RB~NO~186~67.2~5~27~20~42~11~16~New team NO; Kamara/committee risk~1~74.6~RB slate top-5 EASIEST; team slate favourable
+D'Andre Swift~RB~CHI~186~66.8~5~28~21~47~9~16~Monangai pressure~1~59.4~RB slate top-5 TOUGHEST; team slate punishing
+CeeDee Lamb~WR~DAL~186~65.6~4~29~5~11~-11~16~3 TD outlier; Pickens competition~0~~
+Brock Bowers~TE~LV~170~64.2~2~30~2~20~-8~15.5~Knee healthy; Kubiak; thin WR room~0~~
+Drake London~WR~ATL~184~62.8~4~31~6~18~-12~15.5~Only 12 games; 76.6 yd/g pace~0~~
+Rashee Rice~WR~KC~181~60.6~4~32~7~25~-8~15~71.4 yd/g pace in 8 games~0~~
+Quinshon Judkins~RB~CLE~179~59.9~5~33~22~50~11~16~Bad OL; 93% of yards after contact~1~61.7~team slate favourable
+Jeremiyah Love~RB~ARI~178~59.0~5~34~23~26~9~16~ROOKIE ARI. Allgeier/Conner/Benson competing~1~57.2~team slate punishing
+George Pickens~WR~DAL~174~53.4~5~35~8~24~-12~16~~0~~
+Tucker Kraft~TE~GB~157~50.9~3~36~3~71~-7~15~Only 8 games; 15.3 Y/R~1~46.1~TE slate top-5 TOUGHEST
+Chris Olave~WR~NO~167~46.2~6~37~9~28~-6~16~Shough QB~0~~
+A.J. Brown~WR~NE~166~44.8~6~38~10~21~-6~16~To NE with Maye~0~~
+RJ Harvey~RB~DEN~163~43.9~6~39~24~87~18~16~~1~39.0~RB slate top-5 TOUGHEST
+Kenneth Gainwell~RB~TB~162~42.9~6~40~25~97~14~16~To TB; 174 vacated RB opportunities~1~42.9~
+Jared Goff~QB~DET~370~42.9~3~41~3~112~26~16.5~New OC Petzing; elite cmp volume~1~43.1~team slate favourable
+Jaylen Warren~RB~PIT~162~42.5~6~42~26~70~19~16~Dowdle arrives~1~42.5~
+Justin Jefferson~WR~MIN~159~38.2~7~43~11~12~-4~16.5~2 TD is a historic outlier; McCarthy risk~0~~
+Rhamondre Stevenson~RB~NE~157~38.1~6~44~27~78~19~15.5~Henderson competition~1~36.5~team slate punishing
+Zay Flowers~WR~BAL~159~37.9~7~45~12~33~-10~16.5~~1~37.9~
+Nico Collins~WR~HOU~159~37.9~7~46~13~22~-10~15.5~59% catch rate~0~~
+Christian Watson~WR~GB~157~36.1~7~47~14~62~-7~15~17.5 Y/R, only 36 catches~1~36.1~
+Bhayshul Tuten~RB~JAX~154~35.4~6~48~28~54~27~16~MODEL EST line; projected JAX lead~1~35.4~
+Jayden Reed~WR~GB~156~34.9~7~49~15~106~-8~15.5~MODEL EST line; 135 vacated GB targets~1~34.9~
+Rome Odunze~WR~CHI~154~33.0~7~50~16~61~-8~16~48.9% catch rate~1~26.8~WR slate top-5 TOUGHEST; team slate punishing
+Rico Dowdle~RB~PIT~152~32.6~6~51~29~85~27~16~To PIT~1~32.6~
+Dak Prescott~QB~DAL~358~31.5~4~52~4~79~21~15.5~League-leading completions~1~38.7~QB slate top-5 EASIEST
+Jacory Croskey-Merritt~RB~WAS~149~30.1~6~53~30~116~36~16~126 vacated carries in WAS~1~34.5~RB slate top-5 EASIEST
+David Montgomery~RB~HOU~148~29.3~6~54~31~52~28~15.5~To HOU as lead back~1~29.3~
+Colston Loveland~TE~CHI~135~29.1~4~55~4~39~-8~16~11.9 half-PPR ppg from Wk9 on~1~23.7~TE slate top-5 TOUGHEST; team slate punishing
+J.K. Dobbins~RB~DEN~148~29.0~6~56~32~95~35~14~RJ Harvey committee~1~24.5~RB slate top-5 TOUGHEST
+Jadarian Price~RB~SEA~147~28.0~6~57~33~63~26~15.5~ROOKIE SEA. Walker's vacated 252 touches~1~28.0~
+Dalton Kincaid~TE~BUF~133~27.5~4~58~5~120~-10~15.5~~1~26.1~team slate punishing
+Jalen Hurts~QB~PHI~353~26.6~4~59~5~67~-14~16~421 rush yds, 8 rush TD in 2025~1~37.3~QB slate top-5 EASIEST; team slate favourable
+Garrett Wilson~WR~NYJ~146~25.0~8~60~17~38~-10~16~MODEL EST line; Geno upgrade~0~~
+Tyler Warren~TE~IND~130~24.7~4~61~6~51~-8~16~~1~24.7~
+Tetairoa McMillan~WR~CAR~145~24.6~8~62~18~40~-11~16.5~ORoY; 122 tgt is the floor~1~24.6~
+Matthew Stafford~QB~LAR~350~23.1~4~63~6~98~16~15.5~MVP TD rate unrepeatable; age 38~1~19.7~
+Jameson Williams~WR~DET~144~22.9~8~64~19~55~-12~16.5~17.2 Y/R = format loser~1~24.3~team slate favourable
+Bo Nix~QB~DEN~349~21.9~4~65~7~109~4~16.5~612 att = huge cmp volume; low sacks~1~18.5~
+DeVonta Smith~WR~PHI~142~21.6~8~66~20~30~-11~16~~0~~
+Ladd McConkey~WR~LAC~142~21.1~8~67~21~43~-7~16~~1~21.1~
+Sam LaPorta~TE~DET~127~21.0~4~68~7~74~-12~15~Back from herniated disc~1~22.3~team slate favourable
+Tony Pollard~RB~TEN~139~19.7~6~69~34~72~28~15.5~~1~19.7~
+Tee Higgins~WR~CIN~140~19.1~8~70~22~37~-4~15.5~11 TD on 59 rec = big regression~0~~
+Emeka Egbuka~WR~TB~140~19.0~8~71~23~34~-13~16.5~49.6% catch rate is a red flag here~0~~
+Malik Nabers~WR~NYG~140~18.8~8~72~24~29~-13~13.5~MODEL EST line; knee recovery slow~0~~
+Kyle Pitts~TE~ATL~123~17.2~4~73~8~77~-11~16~88 rec is quietly strong here~1~20.8~TE slate top-5 EASIEST
+D.J. Moore~WR~BUF~137~16.1~8~74~25~57~-2~16.5~To BUF with Allen~1~14.7~team slate punishing
+Jaylen Waddle~WR~DEN~136~15.2~8~75~26~44~-7~16~To DEN~1~15.2~
+Marvin Harrison Jr.~WR~ARI~136~14.7~8~76~27~66~-6~15.5~~1~13.4~team slate punishing
+DK Metcalf~WR~PIT~134~12.9~8~77~28~76~-3~15.5~~1~12.9~
+Jonathon Brooks~RB~CAR~131~11.7~6~78~35~89~30~14~Return from injury; Hubbard competition~1~7.7~RB slate top-5 TOUGHEST
+Justin Herbert~QB~LAC~337~10.5~5~79~8~83~-14~16~54 sacks = -54; biggest format loser~1~7.0~
+Brian Thomas Jr.~WR~JAX~131~10.3~8~80~29~69~-4~16~52.7% catch rate collapse~1~14.2~WR slate top-5 EASIEST
+Caleb Williams~QB~CHI~335~8.6~5~81~9~73~-35~16.5~58% cmp is the problem in this format~1~-8.3~QB slate top-5 TOUGHEST; team slate punishing
+Harold Fannin~TE~CLE~114~8.0~5~82~9~80~-2~16~Worst QB room in NFL~1~12.5~TE slate top-5 EASIEST; team slate favourable
+Jaxson Dart~QB~NYG~333~6.3~5~83~10~91~-34~16~Rushing floor; Nabers knee~1~2.8~
+George Kittle~TE~SF~112~6.1~5~84~10~99~3~12~Achilles; early-season risk~1~7.2~team slate favourable
+Alec Pierce~WR~IND~127~6.1~8~85~30~81~-8~15.5~21.3 Y/R = WORST profile for our scoring~1~6.1~
+Davante Adams~WR~LAR~127~6.0~8~86~31~49~-1~15~14 TD on 60 rec = extreme regression~1~6.0~
+Mike Evans~WR~SF~125~4.1~8~87~32~58~3~15~MODEL EST line; to SF age 33~1~5.3~team slate favourable
+Luther Burden~WR~CHI~125~4.0~8~88~33~46~-7~16~78.3% catch rate on limited role~1~-1.0~WR slate top-5 TOUGHEST; team slate punishing
+Michael Wilson~WR~ARI~125~3.8~8~89~34~93~-5~16~MHJ healthy = target loss~1~2.5~team slate punishing
+Jordan Love~QB~GB~330~3.5~5~90~11~130~8~16~Low sacks, low INTs = format fit~1~-0.0~
+Patrick Mahomes~QB~KC~329~2.4~5~91~12~105~-20~16~ACL cleared; Walker added~1~-14.2~QB slate top-5 TOUGHEST; team slate punishing
+Blake Corum~RB~LAR~121~2.1~7~92~36~150~35~16~Kyren pressure point~1~2.1~
+Wan'Dale Robinson~WR~TEN~122~1.5~8~93~35~103~-5~16~To TEN; 92 rec is format gold~1~1.5~
+Oronde Gadsden II~TE~LAC~107~0.9~5~94~11~133~-8~16~~1~0.8~
+Quentin Johnston~WR~LAC~121~0.1~8~95~36~88~-1~15.5~8 TD on 51 rec~1~0.1~
+Dallas Goedert~TE~PHI~106~0.0~5~96~12~111~3~15~11 TD on 60 rec~1~4.2~TE slate top-5 EASIEST; team slate favourable
+Brock Purdy~QB~SF~327~0.0~5~97~13~100~24~15~Low sacks; Evans+Kirk added; turf toe risk~1~-0.2~team slate favourable
+Tyrone Tracy Jr.~RB~NYG~119~0.0~7~98~37~180~22~15.5~Skattebo took the job~1~-0.0~
+Courtland Sutton~WR~DEN~121~0.0~8~99~37~82~-6~16~Waddle arrives~1~-0.0~
+Brenton Strange~TE~JAX~106~0.0~5~100~13~140~-8~15.5~TE8 from Wk12 on~1~-0.0~
+Jake Ferguson~TE~DAL~103~-2.3~5~101~14~119~5~16~82 rec, 7.3 Y/R - reception-driven~1~-2.4~
+Carnell Tate~WR~TEN~118~-3.1~8~102~38~65~-2~15.5~ROOKIE TEN. Ward's WR1 by camp reports~1~-3.1~
+Kyle Monangai~RB~CHI~116~-3.4~7~103~38~145~26~16~~1~-8.0~RB slate top-5 TOUGHEST; team slate punishing
+Parker Washington~WR~JAX~117~-3.6~8~104~39~68~-9~16~~1~-0.0~WR slate top-5 EASIEST
+Jordan Addison~WR~MIN~117~-3.7~8~105~40~107~0~15.5~~1~-0.2~WR slate top-5 EASIEST
+Terry McLaurin~WR~WAS~116~-4.4~8~106~41~45~-10~15~Only 10 games; Diggs added~1~-4.4~
+Jordyn Tyson~WR~NO~116~-4.5~8~107~42~75~-5~15.5~ROOKIE NO. Olave is WR1~1~-3.3~team slate favourable
+Michael Pittman Jr.~WR~PIT~116~-4.5~8~108~43~90~-1~16~To PIT~1~-4.5~
+Mark Andrews~TE~BAL~101~-5.0~5~109~15~122~4~16~Likely gone to NYG~1~-2.0~TE slate top-5 EASIEST
+Daniel Jones~QB~IND~321~-5.3~5~110~14~160~-7~15.5~68% cmp, 22 sacks: quiet format fit~1~-8.7~
+Travis Kelce~TE~KC~99~-6.3~5~111~16~108~-7~15.5~Age 37~1~-7.3~team slate punishing
+Chris Godwin~WR~TB~113~-8.0~8~112~44~83~-2~15~Evans' 116 tgts vacated~1~-8.0~
+Hunter Henry~TE~NE~98~-8.0~5~113~17~132~-4~15.5~AJ Brown arrives~1~-9.0~team slate punishing
+Joe Burrow~QB~CIN~318~-8.6~5~114~15~60~3~15~Health is the whole bet~0~~
+Trevor Lawrence~QB~JAX~317~-9.3~5~115~16~86~-51~16.5~60.9% cmp caps him here~1~-3.3~QB slate top-5 EASIEST
+Dalton Schultz~TE~HOU~95~-10.7~5~116~18~165~-5~15.5~~1~-10.8~
+Jakobi Meyers~WR~JAX~108~-12.5~8~117~45~110~-3~16~~1~-9.3~WR slate top-5 EASIEST
+Juwan Johnson~TE~NO~93~-12.8~5~118~19~150~-6~15.5~~1~-11.9~team slate favourable
+Jordan Mason~RB~MIN~105~-13.5~8~119~39~160~21~15.5~~1~-13.5~
+Kimani Vidal~RB~LAC~105~-14.1~8~120~40~155~17~15~Hampton lead~1~-14.1~
+Xavier Worthy~WR~KC~105~-15.5~8~121~46~128~-2~16~~1~-19.7~WR slate top-5 TOUGHEST; team slate punishing
+Chuba Hubbard~RB~CAR~102~-16.7~8~122~41~84~16~15~~1~-19.8~RB slate top-5 TOUGHEST
+Josh Downs~WR~IND~103~-17.3~8~123~47~94~1~16~~1~-17.3~
+Jayden Higgins~WR~HOU~103~-17.4~8~124~48~138~1~16~~1~-14.3~WR slate top-5 EASIEST
+Zach Charbonnet~RB~SEA~101~-17.9~8~125~42~118~18~13~~1~-17.9~
+Woody Marks~RB~HOU~101~-18.2~8~126~43~170~15~15.5~~1~-18.2~
+Stefon Diggs~WR~WAS~101~-19.4~8~127~49~121~-4~15~~1~-19.4~
+C.J. Stroud~QB~HOU~307~-19.9~6~128~17~140~-13~16~~1~-23.4~
+Romeo Doubs~WR~GB~99~-21.5~8~129~50~155~-1~15.5~~1~-21.5~
+Sam Darnold~QB~SEA~305~-21.8~6~130~18~150~-12~16.5~~1~-25.3~
+Deebo Samuel~WR~WAS~98~-22.7~8~131~51~150~0~15.5~~1~-22.7~
+Isaiah Likely~TE~NYG~82~-23.7~6~132~20~114~-2~15.5~~1~-23.7~
+Baker Mayfield~QB~TB~303~-24.0~6~133~19~145~-32~16.5~~1~-27.5~
+Elic Ayomanor~WR~TEN~96~-24.8~8~134~52~142~-1~16~~1~-24.8~
+Khalil Shakir~WR~BUF~96~-25.2~8~135~53~125~-3~16~~1~-26.2~team slate punishing
+Bryce Young~QB~CAR~299~-27.2~6~136~20~150~-20~16.5~~1~-30.7~
+Ricky Pearsall~WR~SF~93~-28.0~8~137~54~130~-11~15~~1~-27.1~team slate favourable
+Theo Johnson~TE~NYG~76~-29.9~7~138~21~175~-2~15.5~~1~-30.0~
+Makai Lemon~WR~PHI~91~-30.1~8~139~55~96~-4~15~~1~-26.5~WR slate top-5 EASIEST; team slate favourable
+Troy Franklin~WR~DEN~89~-32.0~8~140~56~135~-1~16~~1~-32.0~
+Chig Okonkwo~TE~TEN~71~-34.9~7~141~22~170~1~16~~1~-34.9~
+Keenan Allen~WR~LAC~83~-38.0~9~142~57~145~2~15~~1~-38.0~
+Jauan Jennings~WR~SF~75~-45.7~10~143~58~160~2~15~~1~-45.0~team slate favourable
+Lamar Jackson~QB~BAL~265~-61.6~7~144~21~48~-22~15~36 sacks in 13 games hurts here~0~~
+Jayden Daniels~QB~WAS~255~-72.0~8~145~22~64~-11~15~Only 7 games in 2025~1~-75.5~
+Geno Smith~QB~NYJ~216~-110.1~9~146~23~175~0~16~17 INT + 55 sacks~1~-120.1~QB slate top-5 TOUGHEST
+Tua Tagovailoa~QB~MIA~209~-118.1~9~147~24~170~0~15~15 INT~1~-129.9~QB slate top-5 TOUGHEST; team slate punishing
+`;
+const TEAMS={"Uncle Better Toe Joe":{"place":12,"slot":1,"keep":["Nico Collins","Omarion Hampton"],"roster":[["QB","Caleb Williams"],["WR","Nico Collins"],["WR","Jordan Addison"],["RB","Kyle Monangai"],["RB","RJ Harvey"],["TE","Kyle Pitts Sr."],["W/T","Jameson Williams"],["W/R","Omarion Hampton"],["BN","Jacory Croskey-Merritt"],["BN","Rome Odunze"],["BN","Malik Washington"],["BN","Baker Mayfield"],["BN","Blake Corum"],["IR","Alvin Kamara"]]},
+"Saquon It Ain't So":{"place":11,"slot":2,"keep":["Saquon Barkley","DeVonta Smith"],"roster":[["QB","Justin Herbert"],["WR","Michael Pittman Jr."],["WR","Wan'Dale Robinson"],["RB","Aaron Jones Sr."],["RB","Saquon Barkley"],["TE","Harold Fannin Jr."],["W/T","DeVonta Smith"],["W/R","Bucky Irving"],["BN","Colston Loveland"],["BN","Luther Burden III"],["BN","Marvin Harrison Jr."],["BN","Joe Flacco"],["BN","Tank Bigsby"],["IR","Travis Hunter"]]},
+"We Be Illin'":{"place":10,"slot":3,"keep":["A.J. Brown","Justin Jefferson","Puka Nacua","Drake Maye"],"roster":[["QB","Drake Maye"],["WR","A.J. Brown"],["WR","Justin Jefferson"],["RB","Quinshon Judkins"],["RB","Chris Rodriguez Jr."],["TE","Tyler Warren"],["W/T","Brian Thomas Jr."],["W/R","Puka Nacua"],["BN","Tyrone Tracy Jr."],["BN","Kayshon Boutte"],["BN","Oronde Gadsden"],["BN","Tyler Allgeier"],["BN","Isiah Pacheco"],["BN","Devin Neal"]]},
+"Antonio Firelegs":{"place":9,"slot":4,"keep":["Drake London","George Pickens"],"roster":[["QB","Brock Purdy"],["WR","Stefon Diggs"],["WR","George Pickens"],["RB","David Montgomery"],["RB","Jordan Mason"],["TE","Jake Ferguson"],["W/T","Ladd McConkey"],["W/R","Terry McLaurin"],["BN","Kimani Vidal"],["BN","Tre Tucker"],["BN","Mark Andrews"],["BN","Rashid Shaheed"],["BN","Tua Tagovailoa"],["BN","Chimere Dike"],["BN","Quentin Johnston"],["IR","Drake London"],["IR","Kyler Murray"]]},
+"Dart Vader":{"place":8,"slot":5,"keep":["Kyren Williams","Emeka Egbuka","Lamar Jackson"],"roster":[["QB","Jaxson Dart"],["WR","Jaylen Waddle"],["WR","Darnell Mooney"],["RB","Kyren Williams"],["RB","Rico Dowdle"],["TE","Brenton Strange"],["W/T","Cooper Kupp"],["W/R","Emeka Egbuka"],["BN","George Kittle"],["BN","Lamar Jackson"],["BN","Matthew Golden"],["BN","Davante Adams"],["BN","Rachaad White"],["BN","Ray Davis"],["IR","Tyreek Hill"]]},
+"PTSBee":{"place":7,"slot":6,"keep":["Josh Allen","CeeDee Lamb","Ashton Jeanty","Garrett Wilson"],"roster":[["QB","Josh Allen"],["WR","Zay Flowers"],["WR","CeeDee Lamb"],["RB","Tony Pollard"],["RB","Ashton Jeanty"],["TE","Travis Kelce"],["W/T","Darius Slayton"],["W/R","TreVeyon Henderson"],["BN","Juwan Johnson"],["BN","Kareem Hunt"],["BN","Dalton Kincaid"],["BN","Rashod Bateman"],["BN","Rhamondre Stevenson"],["IR","Garrett Wilson"],["IR","Brandon Aiyuk"]]},
+"Keep it in your pants Cecil":{"place":6,"slot":7,"keep":["Derrick Henry","Josh Jacobs"],"roster":[["QB","Matthew Stafford"],["WR","Deebo Samuel Sr."],["WR","Marvin Mims Jr."],["RB","Derrick Henry"],["RB","Josh Jacobs"],["TE","Colby Parkinson"],["W/T","Dalton Schultz"],["W/R","Kenneth Gainwell"],["BN","Ricky Pearsall"],["BN","Keon Coleman"],["BN","Tez Johnson"],["BN","Chris Brooks"],["BN","Calvin Austin III"],["BN","Emari Demercado"],["IR","James Conner"]]},
+"Pablo Dickasso":{"place":5,"slot":8,"keep":["Joe Burrow","Jonathan Taylor","Tee Higgins"],"roster":[["QB","Joe Burrow"],["WR","Michael Wilson"],["WR","Xavier Worthy"],["RB","Breece Hall"],["RB","Jonathan Taylor"],["TE","Darren Waller"],["W/T","Romeo Doubs"],["W/R","Tee Higgins"],["BN","Chris Godwin Jr."],["BN","Jared Goff"],["BN","Tyjae Spears"],["BN","J.K. Dobbins"],["BN","Bam Knight"],["BN","Hollywood Brown"],["IR","Sam LaPorta"]]},
+"HOT SAUSE":{"place":4,"slot":9,"keep":["Christian McCaffrey","Amon-Ra St. Brown","Kenneth Walker III","Brock Bowers"],"roster":[["QB","Jalen Hurts"],["WR","Amon-Ra St. Brown"],["WR","Christian Watson"],["RB","Christian McCaffrey"],["RB","Travis Etienne Jr."],["TE","Michael Mayer"],["W/T","Troy Franklin"],["W/R","Kenneth Walker III"],["BN","Brock Bowers"],["BN","Michael Carter"],["BN","DK Metcalf"],["BN","Zach Charbonnet"],["BN","C.J. Stroud"],["BN","Jawhar Jordan"]]},
+"The Bees Knees":{"place":3,"slot":10,"keep":["De'Von Achane","Trey McBride","Rashee Rice","Chris Olave"],"roster":[["QB","Dak Prescott"],["WR","Tetairoa McMillan"],["WR","Chris Olave"],["RB","De'Von Achane"],["RB","D'Andre Swift"],["TE","Trey McBride"],["W/T","Mike Evans"],["W/R","DJ Moore"],["BN","Audric Estime"],["BN","Woody Marks"],["BN","Emanuel Wilson"],["BN","Sean Tucker"],["IR","Joe Mixon"],["IR","Rashee Rice"]]},
+"Expected Sacko":{"place":2,"slot":11,"keep":["Jahmyr Gibbs","Jaxon Smith-Njigba","James Cook","Chase Brown"],"roster":[["QB","Bo Nix"],["WR","Jaxon Smith-Njigba"],["WR","Courtland Sutton"],["RB","James Cook III"],["RB","Jahmyr Gibbs"],["TE","Hunter Henry"],["W/T","Jauan Jennings"],["W/R","Chase Brown"],["BN","Jacoby Brissett"],["BN","Alec Pierce"],["BN","Jerry Jeudy"],["BN","Josh Downs"],["BN","Dylan Sampson"],["BN","Dallas Goedert"]]},
+"Sugma":{"place":1,"slot":12,"keep":["Ja'Marr Chase","Bijan Robinson","Cam Skattebo","Malik Nabers"],"roster":[["QB","Trevor Lawrence"],["WR","Ja'Marr Chase"],["WR","Parker Washington"],["RB","Bijan Robinson"],["RB","Jaylen Warren"],["TE","Taysom Hill"],["W/T","Jakobi Meyers"],["W/R","Javonte Williams"],["BN","Elic Ayomanor"],["BN","Christian Kirk"],["BN","Patrick Mahomes"],["BN","Andrei Iosivas"],["BN","Chuba Hubbard"],["BN","Nick Chubb"],["IR","Cam Skattebo"],["IR","Malik Nabers"]]}};
+const DEFS=[["DEN",229,229,-6,6,"68 sacks led the NFL and 29 TDs allowed was the fewest. Some regression is priced in."],["LAR",212,178,34,0,"Added Myles Garrett (23 sacks, NFL record, 2x DPOY) plus corners Trent McDuffie and Jaylen Watson. Lost Jared Verse. An Aaron Donald return is not counted here."],["LAC",198,198,0,0,"49 sacks and 19 interceptions, but recovered only 3 fumbles."],["HOU",197,204,-7,0,"4 defensive touchdowns will not repeat. 295 points allowed was 2nd fewest."],["SEA",194,200,-6,0,"Fewest points allowed in the NFL at 292. Best yards per carry allowed at 3.7."],["ATL",187,187,0,0,"57 sacks, 2nd most in the NFL."],["JAX",180,180,0,0,"22 interceptions, 2nd most. Fewest rushing yards allowed at 1,449."],["PIT",168,169,-7,6,"4 defensive touchdowns and 12 fumble recoveries. Easy schedule."],["MIN",164,170,0,-6,"2nd fewest touchdowns allowed. Toughest defensive schedule."],["CLE",161,185,-30,6,"Lost Myles Garrett, which was the pass rush."],["CHI",157,166,-9,0,"23 interceptions led the NFL and will not repeat."],["DET",154,154,0,0,"49 sacks, 4th in the NFL."],["PHI",153,159,0,-6,"Fewest passing touchdowns allowed at 14. Tough schedule."],["NO",152,152,0,0,"45 sacks, 9th."],["NE",150,150,0,0,"330 points allowed, 5th."],["KC",139,141,-8,6,"Lost Trent McDuffie to the Rams."],["GB",136,136,0,0,""],["BUF",132,132,0,0,"Fewest passing yards allowed, but 22 rushing TDs allowed."]];
+const PICKS=[[31,"R6"],[43,"R7"],[55,"R8"],[67,"R9"],[79,"R10"],[91,"R11"],[115,"R13"],[127,"R14"],[139,"R15"],[151,"R16"],[157,"R17 via We Be Illin'"],[161,"R17 via Cecil"],[163,"R17"]];
+const MYKEEPERS=["Christian McCaffrey","Amon-Ra St. Brown","Brock Bowers","Kenneth Walker III"];
+</script>
+<script>
+(function(){'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')};
+var PLAYERS=ROWS.trim().split('\n').map(function(line){var c=line.split('~');return{n:c[0],p:c[1],t:c[2],pts:+c[3],v:+c[4],tier:+c[5],rk:+c[6],prk:+c[7],adp:c[8]===''?null:+c[8],fmt:+c[9],g:c[10],note:c[11]||'',avail:c[12]==='1',kv:c[13]===''?null:+c[13],sos:c[14]||''}});
+var idx={};PLAYERS.forEach(function(p){idx[p.n]=p});
+function alias(n){var a={'Kyle Pitts Sr.':'Kyle Pitts','Harold Fannin Jr.':'Harold Fannin','Luther Burden III':'Luther Burden','James Cook III':'James Cook','Travis Etienne Jr.':'Travis Etienne','Deebo Samuel Sr.':'Deebo Samuel','Chris Godwin Jr.':'Chris Godwin','DJ Moore':'D.J. Moore','Oronde Gadsden':'Oronde Gadsden II'};return a[n]||n}
+
+/* ===== LIVE DRAFT STATE ===== */
+var DKEY='hotsause_draft_v1';
+var DRAFT={},        // name -> 'theirs' | 'mine'
+    ORDER=[],        // chronological list of drafted names (for undo)
+    MYDEF=null;      // team code of my drafted defense
+function saveDraft(){try{localStorage.setItem(DKEY,JSON.stringify({d:DRAFT,o:ORDER,def:MYDEF}))}catch(e){}}
+function loadDraft(){try{var r=JSON.parse(localStorage.getItem(DKEY));if(r){DRAFT=r.d||{};ORDER=r.o||[];MYDEF=r.def||null}}catch(e){}}
+loadDraft();
+var STARTERS=[['QB',1],['RB',2],['WR',2],['TE',1],['W/T',1],['W/R',1],['DEF',1]]; // flex fills RB/WR/TE per rules
+var KEEPERS=MYKEEPERS.slice(); // 4 keepers seed the roster
+// mark a player
+function draftPlayer(name,who){
+  if(!name)return;
+  if(DRAFT[name]){ if(DRAFT[name]===who)return; }        // already same tag
+  else ORDER.push(name);
+  DRAFT[name]=who; saveDraft(); refreshAll();
+}
+function draftDef(code){ MYDEF=code; ORDER.push('DEF:'+code); saveDraft(); refreshAll(); }
+function undoLast(){
+  var last=ORDER.pop(); if(!last)return;
+  if(last.indexOf('DEF:')===0){ MYDEF=null; }
+  else { delete DRAFT[last]; }
+  saveDraft(); refreshAll();
+}
+function resetDraft(){ DRAFT={};ORDER=[];MYDEF=null; saveDraft(); refreshAll(); }
+function isGone(name){return !!DRAFT[name]}          // off every board
+function isMine(name){return DRAFT[name]==='mine'}
+// live available list = static-available AND not yet drafted
+function liveAvail(){return avail.filter(function(p){return !isGone(p.n)})}
+
+$$('.tabs button').forEach(function(b){b.addEventListener('click',function(){$$('.tabs button').forEach(function(x){x.setAttribute('aria-selected','false')});$$('.panel').forEach(function(p){p.classList.remove('active')});b.setAttribute('aria-selected','true');$('#'+b.dataset.tab).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})})});
+(function(){var d=Math.ceil((new Date('2026-09-06T13:00:00-04:00')-new Date())/86400000);$('#clock').textContent=d>0?d+(d===1?' day':' days'):'today'})();
+var CT={QB:8,RB:9,WR:5,TE:6};
+var curCPos='RB';
+function cleanTiers(posn){var list=PLAYERS.filter(function(x){return x.p===posn&&!isGone(x.n)}).sort(function(a,b){return b.v-a.v}).slice(0,36);var out='',cur=null,buf=[];
+function flush(){if(!buf.length)return;out+='<div class="tierblock"><h4>Tier '+cur+'</h4><ul>'+buf.map(function(r){return '<li><b>'+esc(r.n)+'</b><span>'+r.t+' \u00b7 '+r.pts.toFixed(0)+' pts \u00b7 VORP '+r.v.toFixed(0)+' \u00b7 ADP '+(r.adp==null?'\u2014':r.adp)+'</span>'+(r.note?'<em>'+esc(r.note)+'</em>':'')+'</li>'}).join('')+'</ul></div>';buf=[]}
+list.forEach(function(r,i){if(r.tier!==cur){if(cur!==null){var gap=list[i-1].v-r.v;var cls=gap>2*CT[posn]?'major':(gap>1.25*CT[posn]?'mod':'low');var lab=cls==='major'?'Major tier cliff':(cls==='mod'?'Moderate tier cliff':'Shallow break');flush();out+='<div class="cliffbar '+cls+'"><span>'+lab+'</span><span>'+gap.toFixed(0)+' VORP drop</span></div>'}cur=r.tier}buf.push(r)});
+flush();$('#cleanWrap').innerHTML=out}
+$$('[data-cpos]').forEach(function(c){c.addEventListener('click',function(){$$('[data-cpos]').forEach(function(x){x.classList.remove('on')});c.classList.add('on');curCPos=c.dataset.cpos;cleanTiers(curCPos)})});
+cleanTiers('RB');
+$('#cleanOverall').innerHTML=PLAYERS.slice().sort(function(a,b){return a.rk-b.rk}).slice(0,100).map(function(p){var d=p.adp==null?null:p.adp-p.rk;return '<tr><td class="rk">'+p.rk+'</td><td class="name">'+esc(p.n)+'</td><td class="pos c">'+p.p+p.prk+'</td><td class="pos c">'+p.t+'</td><td class="num">'+p.pts.toFixed(0)+'</td><td class="num">'+p.v.toFixed(0)+'</td><td class="num">'+(p.adp==null?'\u2014':p.adp)+'</td><td class="num '+(d>0?'up':d<0?'down':'')+'">'+(d==null?'\u2014':(d>0?'+'+d:d))+'</td><td class="num '+(p.fmt>0?'up':p.fmt<0?'down':'')+'">'+(p.fmt>0?'+'+p.fmt:p.fmt)+'</td></tr>'}).join('');
+var apos='ALL',aterm='',sortKey='kv',sortDir='desc';
+var avail=PLAYERS.filter(function(p){return p.avail&&p.kv!=null}).sort(function(a,b){return b.kv-a.kv});
+avail.forEach(function(r,i){r.ark=i+1});
+var maxKV=avail.length?avail[0].kv:1;
+function poolSort(a,b){var av,bv;
+  if(sortKey==='adp'){av=a.adp==null?Infinity:a.adp;bv=b.adp==null?Infinity:b.adp;}
+  else{av=a.kv;bv=b.kv;}
+  if(av===bv)return b.kv-a.kv;
+  return sortDir==='asc'?av-bv:bv-av;}
+function syncPoolCarets(){$$('#pool th.sortable').forEach(function(th){var on=th.dataset.sort===sortKey;th.classList.toggle('active',on);th.classList.toggle('asc',on&&sortDir==='asc');th.classList.toggle('desc',on&&sortDir==='desc')})}
+function renderPool(){var rows=avail.filter(function(p){if(isGone(p.n))return false;if(apos!=='ALL'&&p.p!==apos)return false;if(aterm&&p.n.toLowerCase().indexOf(aterm)===-1)return false;return true}).sort(poolSort).slice(0,90);
+$('#poolBody').innerHTML=rows.map(function(p){var w=Math.max(2,(p.kv/maxKV)*100);var flag=p.sos.indexOf('EASIEST')>-1?'up':(p.sos.indexOf('TOUGHEST')>-1?'down':'');return '<tr><td class="rk">'+p.ark+'</td><td class="name">'+esc(p.n)+'</td><td class="pos c">'+p.p+p.prk+'</td><td class="pos c">'+p.t+'</td><td class="vcell"><span class="bar"><i style="width:'+w+'%"></i><b>'+p.kv.toFixed(0)+'</b></span></td><td class="num">'+(p.adp==null?'\u2014':p.adp)+'</td><td class="sos '+flag+'">'+esc(p.sos||'\u2014')+'</td><td class="act">'+actBtns(p.n)+'</td></tr>'}).join('')||'<tr><td colspan="8" style="padding:26px;color:#8A8A93">No players match.</td></tr>'}
+$$('[data-apos]').forEach(function(c){c.addEventListener('click',function(){$$('[data-apos]').forEach(function(x){x.classList.remove('on')});c.classList.add('on');apos=c.dataset.apos;renderPool()})});
+$('#aq').addEventListener('input',function(e){aterm=e.target.value.toLowerCase().trim();renderPool()});
+$$('#pool th.sortable').forEach(function(th){th.addEventListener('click',function(){var k=th.dataset.sort;if(sortKey===k){sortDir=sortDir==='asc'?'desc':'asc';}else{sortKey=k;sortDir=(k==='adp')?'asc':'desc';}syncPoolCarets();renderPool()})});
+syncPoolCarets();
+renderPool();
+/* ===== ROUND BOARD ===== */
+var TEAMS=12,KEEP=38;
+var keptADP=PLAYERS.filter(function(p){return !p.avail&&p.adp!=null}).map(function(p){return p.adp}).sort(function(a,b){return a-b});
+function roundOfLive(l){return Math.ceil((l+KEEP)/TEAMS)}
+avail.forEach(function(p){
+  if(p.adp==null){p.lp=null;return}
+  var ahead=0;for(var i=0;i<keptADP.length;i++){if(keptADP[i]<p.adp)ahead++}
+  p.lp=Math.max(1,Math.round(p.adp-ahead));
+  p.rd=roundOfLive(p.lp);
+  p.mr=Math.ceil(p.adp/TEAMS);
+});
+var MYPICKS=PICKS.map(function(x){return x[0]});
+var PICKLBL={};PICKS.forEach(function(x){PICKLBL[x[0]]=x[1]});
+var rbPos='ALL',rbPick=MYPICKS[0];
+(function(){var sel=$('#rbPick');sel.innerHTML=PICKS.map(function(x){return '<option value="'+x[0]+'">#'+x[0]+' \u00b7 '+x[1]+'</option>'}).join('');sel.value=String(rbPick);
+ sel.addEventListener('change',function(){rbPick=+sel.value;renderRounds()})})();
+function nextPick(s){for(var i=0;i<MYPICKS.length;i++){if(MYPICKS[i]>s)return MYPICKS[i]}return null}
+function lastSafe(lp){var m=null;MYPICKS.forEach(function(x){if(x<=lp)m=x});return m}
+function renderRounds(){
+  var pool=avail.filter(function(p){return p.lp!=null&&!isGone(p.n)&&(rbPos==='ALL'||p.p===rbPos)}).sort(function(a,b){return a.lp-b.lp});
+  var byR={};pool.forEach(function(p){(byR[p.rd]=byR[p.rd]||[]).push(p)});
+  var rs={};Object.keys(byR).forEach(function(k){rs[+k]=1});MYPICKS.forEach(function(m){rs[roundOfLive(m)]=1});
+  var keys=Object.keys(rs).map(Number).sort(function(a,b){return a-b});
+  var nxt=nextPick(rbPick),jump='',out='';
+  keys.forEach(function(r){
+    var list=byR[r]||[];
+    var ls=Math.max(1,(r-1)*TEAMS+1-KEEP),le=r*TEAMS-KEEP;
+    var mine=MYPICKS.filter(function(m){return roundOfLive(m)===r});
+    jump+='<a href="#rd'+r+'" class="'+(mine.length?'mine':'')+'">R'+r+'</a>';
+    out+='<div class="rblock" id="rd'+r+'"><div class="rhead"><span class="rnum">Round '+r+'</span>'+
+      '<span class="rmeta">Live picks '+ls+'\u2013'+le+' \u00b7 overall '+((r-1)*TEAMS+1)+'\u2013'+(r*TEAMS)+' \u00b7 '+list.length+' name'+(list.length===1?'':'s')+'</span>'+
+      (mine.length?'<span class="rmine">You are on the clock \u00b7 '+mine.map(function(m){return '#'+m}).join(' + ')+'</span>':'')+
+      '</div>';
+    if(!list.length){out+='<p class="rdry">Nothing left on the modelled board this deep. Anything here is a dart throw \u2014 handcuffs, rookie stashes, or a second defense.</p></div>';return}
+    var pending=mine.slice(),rows='<li class="prow phead"><span class="pk">Pick</span><span class="pnm">Player</span><span class="ppos">Pos</span><span class="ptm">Tm</span><span class="pval">Val</span><span class="pmkt">Market</span><span class="pver">Verdict</span></li>';
+    list.forEach(function(p){
+      while(pending.length&&p.lp>=pending[0]){rows+=clockRow(pending.shift())}
+      rows+=playerRow(p,nxt);
+    });
+    while(pending.length){rows+=clockRow(pending.shift())}
+    out+='<ol class="rlist">'+rows+'</ol></div>';
+  });
+  $('#roundJump').innerHTML=jump;
+  $('#roundBody').innerHTML=out||'<p class="rdry">No players match that filter.</p>';
+}
+function clockRow(m){return '<li class="clockrow"><b>Your pick</b> #'+m+' \u00b7 '+(PICKLBL[m]||'')+' \u2014 everything above here is expected gone</li>'}
+function playerRow(p,nxt){
+  var st,ver,d=p.lp-rbPick;
+  if(p.lp<rbPick){st='s-gone';ver='Gone by #'+rbPick}
+  else if(nxt!=null&&p.lp>=nxt){st='s-wait';var m=lastSafe(p.lp);ver='Waits to #'+m+' \u00b7 '+(PICKLBL[m]||'')}
+  else if(d<=1){st='s-take';ver='On the number'}
+  else{st='s-take';ver='Take now \u00b7 reach '+d}
+  return '<li class="prow '+st+'">'+
+    '<span class="pk">'+p.lp+'</span>'+
+    '<span class="pnm">'+esc(p.n)+(p.note?'<i>'+esc(p.note)+'</i>':'')+'</span>'+
+    '<span class="ppos">'+p.p+p.prk+'</span>'+
+    '<span class="ptm">'+p.t+'</span>'+
+    '<span class="pval">'+p.kv.toFixed(0)+'</span>'+
+    '<span class="pmkt">ADP '+(p.adp==null?'\u2014':p.adp)+' \u00b7 mkt R'+p.mr+'</span>'+
+    '<span class="pver">'+ver+'</span></li>';
+}
+$$('[data-rpos]').forEach(function(c){c.addEventListener('click',function(){$$('[data-rpos]').forEach(function(x){x.classList.remove('on')});c.classList.add('on');rbPos=c.dataset.rpos;renderRounds()})});
+renderRounds();
+renderDef();function renderDef(){$('#defBody').innerHTML=DEFS.map(function(d,i){var mine=MYDEF===d[0];return '<tr'+(mine?' style="background:rgba(14,58,24,.5)"':'')+'><td class="rk">'+(i+1)+'</td><td class="name">'+d[0]+(mine?' <span class="kbadge" style="background:#1C6E33;color:#5BE08A">MINE</span>':'')+'</td><td class="num" style="color:var(--glow);font-weight:700">'+d[1]+'</td><td class="num">'+d[2]+'</td><td class="num '+(d[3]>0?'up':d[3]<0?'down':'')+'">'+(d[3]>0?'+'+d[3]:(d[3]||'\u2014'))+'</td><td class="num '+(d[4]>0?'up':d[4]<0?'down':'')+'">'+(d[4]>0?'+'+d[4]:(d[4]||'\u2014'))+'</td><td class="sos">'+esc(d[5]||'\u2014')+'</td><td class="act">'+(mine?'<button class="btn-mine" data-undef="1">\u2713 Mine</button>':'<button class="btn-mine" data-defpick="'+d[0]+'">My DEF</button>')+'</td></tr>'}).join('')}
+var PLAN=['Best RB/WR available \u2014 board collapses 34 to 17 by the next pick','Jared Goff (84% available). Fallback Bo Nix or Stafford','WR2. Jordyn Tyson if you want the rookie swing','Top defense (Rams or Denver) or receiver depth','Blake Corum \u2014 100% available this deep','McCaffrey handcuff / upside stash','Depth','Depth','Upside dart','Upside dart','Upside dart','Upside dart','KICKER \u2014 final pick only'];
+$('#pickBody').innerHTML=PICKS.map(function(p,i){return '<tr><td class="num" style="color:var(--glow);font-weight:700">#'+p[0]+'</td><td class="pos">'+p[1]+'</td><td>'+PLAN[i]+'</td></tr>'}).join('');
+var slots=Object.keys(TEAMS).sort(function(a,b){return TEAMS[a].slot-TEAMS[b].slot});
+$('#leagueWrap').innerHTML=slots.map(function(t){var d=TEAMS[t],me=t==='HOT SAUSE';var kept={};d.keep.forEach(function(n){kept[n]=1});var pc={RB:0,WR:0,QB:0,TE:0};d.keep.forEach(function(n){var p=idx[alias(n)];if(p)pc[p.p]++});var needs=['QB','RB','WR','TE'].filter(function(x){return !pc[x]});
+return '<div class="team'+(me?' me':'')+'"><div class="thead"><span class="slot-badge">Slot '+d.slot+'</span><h4>'+esc(t)+'</h4></div><p class="place">Finished '+d.place+'th \u00b7 keeps '+d.keep.length+(needs.length?' \u00b7 <b style="color:var(--glow)">no '+needs.join('/')+'</b>':'')+'</p><ol>'+d.roster.map(function(r){var p=idx[alias(r[1])];var cls=kept[r[1]]?'kept':((r[0]==='BN'||r[0]==='IR')?'bench':'');return '<li class="'+cls+'"><span class="slot">'+r[0]+'</span>'+esc(r[1])+(kept[r[1]]?'<span class="keepmark">KEEP</span>':'')+'<span class="val">'+(p?p.p+p.prk+' \u00b7 '+p.v.toFixed(0):'\u2014')+'</span></li>'}).join('')+'</ol></div>'}).join('');
+var GRADE={'Christian McCaffrey':'Priced at 14.5 games rather than pretending the age-30, 450-touch profile is not real. San Francisco drew a favourable team schedule. The handcuff is a live draft target.','Amon-Ra St. Brown':'117 catches protect him better than any receiver in the league under our reception scoring, and Detroit drew the easiest overall slate. Stacking him with Goff pays twice on every touchdown.','Brock Bowers':'Solves tight end and frees the W/T slot outright. Las Vegas has the toughest schedule in football at QB, RB and WR, though tight end escapes the worst five.','Kenneth Walker III':'Kansas City feature back with Mahomes cleared for Week 1 and Rice on a careful ramp. Vegas has his rushing line at 924.5, which is 186 yards below our projection \u2014 treat that as real downside.'};
+
+/* ===== MY TEAM ENGINE ===== */
+function myPicks(){return ORDER.filter(function(x){return x.indexOf('DEF:')!==0&&DRAFT[x]==='mine'})}
+function rosterPlayers(){ // keepers + my picks, as player objects
+  var names=KEEPERS.concat(myPicks());
+  var seen={},out=[];
+  names.forEach(function(n){var p=idx[alias(n)]||idx[n];if(p&&!seen[p.n]){seen[p.n]=1;out.push({p:p,keep:KEEPERS.indexOf(n)>-1})}});
+  return out;
+}
+// greedy fill of starting slots; returns {slots:[{slot,filledBy}], bench:[], open:{POS:count}}
+function solveLineup(){
+  var players=rosterPlayers().slice().sort(function(a,b){return b.p.v-a.p.v});
+  var slots=[];
+  STARTERS.forEach(function(s){for(var i=0;i<s[1];i++)slots.push({slot:s[0],fill:null})});
+  var used={};
+  // DEF slot from MYDEF
+  slots.forEach(function(sl){if(sl.slot==='DEF'&&MYDEF)sl.fill={def:MYDEF}});
+  function eligible(pos,slot){if(slot==='DEF')return false;if(slot==='W/R')return pos==='RB'||pos==='WR';if(slot==='W/T')return pos==='WR'||pos==='TE';return pos===slot}
+  // fill strict slots first (QB,RB,WR,TE), then flexes, best value first
+  ['QB','RB','WR','TE','W/T','W/R'].forEach(function(sl){
+    slots.forEach(function(slot){
+      if(slot.slot!==sl||slot.fill)return;
+      for(var i=0;i<players.length;i++){var pl=players[i];if(used[pl.p.n])continue;if(eligible(pl.p.p,slot.slot)){slot.fill=pl;used[pl.p.n]=1;break}}
+    });
+  });
+  var bench=players.filter(function(pl){return !used[pl.p.n]});
+  var open={};slots.forEach(function(sl){if(!sl.fill){open[sl.slot]=(open[sl.slot]||0)+1}});
+  return {slots:slots,bench:bench,open:open,players:players};
+}
+// which positions can still help a starting slot (respects no-2nd-TE / no-2nd-QB)
+function positionNeeds(){
+  var L=solveLineup(),players=L.players;
+  var has={QB:0,RB:0,WR:0,TE:0};
+  players.forEach(function(pl){has[pl.p.p]=(has[pl.p.p]||0)+1});
+  // count starting demand by position that an added player of that pos could satisfy
+  var demand={QB:0,RB:0,WR:0,TE:0,DEF:0};
+  L.slots.forEach(function(sl){if(sl.fill)return;
+    if(sl.slot==='QB')demand.QB++;
+    else if(sl.slot==='RB')demand.RB++;
+    else if(sl.slot==='WR')demand.WR++;
+    else if(sl.slot==='TE')demand.TE++;
+    else if(sl.slot==='DEF')demand.DEF++;
+    else if(sl.slot==='W/R'){demand.RB++;demand.WR++;}
+    else if(sl.slot==='W/T'){demand.WR++;demand.TE++;}
+  });
+  // HARD RULES: never a 2nd QB, never a 2nd TE (roster already has Bowers keeper as TE)
+  var teCount=has.TE||0, qbCount=has.QB||0;
+  var allow={QB:qbCount<1,RB:true,WR:true,TE:teCount<1,DEF:true};
+  var score={}; // higher = more needed
+  ['QB','RB','WR','TE','DEF'].forEach(function(pos){
+    if(!allow[pos]){score[pos]=-1;return}
+    var base=demand[pos]||0;
+    // scarcity weighting: RB scarcest in this format, then WR, QB, DEF, TE
+    var w={RB:1.35,WR:1.15,QB:1.0,DEF:0.9,TE:0.8}[pos];
+    // if a starting slot is literally open, that dominates
+    score[pos]=base>0 ? (100+base*10)*w : (allow[pos]? 5*w : 0);
+  });
+  return {score:score,allow:allow,demand:demand,open:L.open,lineup:L,has:has};
+}
+function topNeed(){
+  var N=positionNeeds(),best=null,bv=-1;
+  ['RB','WR','QB','TE','DEF'].forEach(function(pos){if(N.score[pos]>bv){bv=N.score[pos];best=pos}});
+  return {pos:best,info:N};
+}
+var POSLONG={QB:'Quarterback',RB:'Running back',WR:'Wide receiver',TE:'Tight end',DEF:'Defense'};
+function renderNeedBar(){
+  var N=positionNeeds(),t=topNeed();
+  var openSlots=[];N.lineup.slots.forEach(function(sl){if(!sl.fill)openSlots.push(sl.slot)});
+  var msg;
+  if(t.pos==='DEF'&&openSlots.length===1&&openSlots[0]==='DEF'){
+    msg='Skill positions are set. Your one remaining starting hole is defense \u2014 worth a real pick in this format, so lock a top unit rather than streaming.';
+  } else if(openSlots.length===0){
+    msg='Every starting slot is filled. From here you are drafting for upside, bench depth, and your defense \u2014 best value available, no positional pressure.';
+  } else {
+    var pretty={RB:'running back',WR:'wide receiver',QB:'quarterback',TE:'tight end',DEF:'defense'}[t.pos];
+    msg='Biggest hole is '+pretty+'. '+(t.pos==='RB'?'Backs are the scarce commodity under our scoring \u2014 do not let the run pass you by.':t.pos==='WR'?'You still need receiving volume for the flex slots.':t.pos==='QB'?'One quarterback covers you \u2014 grab your guy, then never again.':t.pos==='DEF'?'Lock a top defense; it is worth more than a replacement quarterback here.':'')+(!N.allow.TE?' Tight end is closed \u2014 Bowers has it.':'')+(!N.allow.QB?' Quarterback is closed.':'');
+  }
+  var pills=['QB','RB','WR','TE','DEF'].map(function(pos){
+    var demand=N.demand[pos]||0, closed=!N.allow[pos];
+    var cls=closed?'filled':(demand>0?'open':'filled');
+    var lab=closed?'closed':(demand>0?demand+' open':'set');
+    return '<span class="needpill '+cls+'"><b>'+pos+'</b> \u00b7 '+lab+'</span>';
+  }).join('');
+  $('#needBar').innerHTML='<div class="needbar"><p class="nlab">Biggest need right now</p><h3 class="big">'+(openSlots.length?POSLONG[t.pos]:'Roster on track')+'</h3><p>'+msg+'</p><div class="needgrid">'+pills+'</div></div>';
+}
+function renderRoster(){
+  var L=solveLineup();
+  var start='',bench='';
+  L.slots.forEach(function(sl){
+    if(sl.fill&&sl.fill.def){start+='<li><span class="rslot">'+sl.slot+'</span><span class="rnm">'+sl.fill.def+' D/ST</span><span class="rv">DEF</span></li>';}
+    else if(sl.fill){var p=sl.fill.p;start+='<li'+(sl.fill.keep?' class="keepseed"':'')+'><span class="rslot">'+sl.slot+'</span><span class="rnm">'+esc(p.n)+(sl.fill.keep?'<span class="kbadge">KEEP</span>':'')+'</span><span class="rv">'+p.p+p.prk+' \u00b7 '+p.v.toFixed(0)+'</span></li>';}
+    else{start+='<li class="empty"><span class="rslot">'+sl.slot+'</span><span class="rnm">open</span><span class="rv">\u2014</span></li>';}
+  });
+  bench=L.bench.length?L.bench.map(function(pl){return '<li'+(pl.keep?' class="keepseed"':'')+'><span class="rslot">BN</span><span class="rnm">'+esc(pl.p.n)+(pl.keep?'<span class="kbadge">KEEP</span>':'')+'</span><span class="rv">'+pl.p.p+pl.p.prk+' \u00b7 '+pl.p.v.toFixed(0)+'</span></li>'}).join(''):'<li class="empty"><span class="rnm">no bench yet</span></li>';
+  $('#rosterWrap').innerHTML='<div class="rgroup"><h4>Starters</h4><ol>'+start+'</ol></div><div class="rgroup"><h4>Bench</h4><ol>'+bench+'</ol></div>';
+}
+/* ===== WAR ROOM LIVE TARGETS ===== */
+function renderTargets(){
+  var N=positionNeeds(),t=topNeed();
+  var live=liveAvail().filter(function(p){return N.allow[p.p]!==false}).slice();
+  if(!live.length){$('#tgtList').innerHTML='<div class="emptytgt">No eligible targets \u2014 every remaining need is closed. Draft best value or your defense.</div>';return}
+  // blended score: value, lifted for positions with an open starting slot
+  live.forEach(function(p){var sc=N.score[p.p]||0;var w=sc>0?(1+Math.min(sc,130)/200):0.3;p._t=p.kv*w});
+  live.sort(function(a,b){return b._t-a._t});
+  var five=live.slice(0,5);
+  // guarantee the single best player at the top open need appears (if a slot is truly open)
+  var openPos=[];N.lineup.slots.forEach(function(sl){if(!sl.fill){var m={'W/R':['RB','WR'],'W/T':['WR','TE']}[sl.slot]||[sl.slot];m.forEach(function(x){if(openPos.indexOf(x)<0)openPos.push(x)})}});
+  if(t.pos&&openPos.indexOf(t.pos)>-1){
+    var bestNeed=live.filter(function(p){return p.p===t.pos}).sort(function(a,b){return b.kv-a.kv})[0];
+    if(bestNeed&&five.indexOf(bestNeed)<0){five[4]=bestNeed;} // swap into last slot
+  }
+  $('#tgtList').innerHTML=five.map(function(p,i){var openHere=openPos.indexOf(p.p)>-1;return '<div class="tgt"><span class="trank">'+(i+1)+'</span><span class="tnm">'+esc(p.n)+(openHere?' <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:#5BE08A;border:1px solid #1C6E33;border-radius:2px;padding:1px 5px;vertical-align:middle">FILLS NEED</span>':'')+'<small>'+p.p+p.prk+' \u00b7 '+p.t+' \u00b7 keeper-adj '+p.kv.toFixed(0)+(p.sos?' \u00b7 '+esc(p.sos.replace(/;.*/,'')):'')+'</small></span><span class="tval">'+p.kv.toFixed(0)+'</span><span class="tbtns">'+actBtns(p.n)+'</span></div>'}).join('');
+}
+/* ===== SHARED: action buttons + refresh ===== */
+function actBtns(name){return '<button class="btn-draft" data-draft="'+encodeURIComponent(name)+'">Drafted</button><button class="btn-mine" data-mine="'+encodeURIComponent(name)+'">My Pick</button>'}
+function renderCounts(){
+  var gone=Object.keys(DRAFT).length+(MYDEF?1:0);
+  var mine=myPicks().length+(MYDEF?1:0);
+  var left=liveAvail().length;
+  if($('#dGone'))$('#dGone').textContent=gone;
+  if($('#dMine'))$('#dMine').textContent=mine;
+  if($('#dLeft'))$('#dLeft').textContent=left;
+  var u=$('#btnUndo');if(u)u.disabled=ORDER.length===0;
+}
+function refreshAll(){
+  cleanTiers(curCPos); renderPool(); renderRounds(); renderDef();
+  renderNeedBar(); renderRoster(); renderTargets(); renderCounts();
+}
+/* ===== SEARCH TYPE-AHEAD ===== */
+(function(){
+  var box=$('#dsearch'),list=$('#acList');if(!box)return;
+  function render(q){
+    q=q.toLowerCase().trim();
+    if(!q){list.innerHTML='';return}
+    var hits=avail.filter(function(p){return !isGone(p.n)&&p.n.toLowerCase().indexOf(q)>-1}).slice(0,8);
+    if(!hits.length){list.innerHTML='<div class="acrow"><span class="acn" style="color:var(--dim)">No available player matches</span></div>';return}
+    list.innerHTML=hits.map(function(p){return '<div class="acrow"><span class="acn">'+esc(p.n)+'<small>'+p.p+p.prk+' \u00b7 '+p.t+' \u00b7 val '+p.kv.toFixed(0)+' \u00b7 ADP '+(p.adp==null?'\u2014':p.adp)+'</small></span><button class="btn-draft" data-draft="'+encodeURIComponent(p.n)+'">Drafted</button><button class="btn-mine" data-mine="'+encodeURIComponent(p.n)+'">My Pick</button></div>'}).join('');
+  }
+  box.addEventListener('input',function(){render(box.value)});
+  box.addEventListener('focus',function(){render(box.value)});
+  document.addEventListener('click',function(e){if(!box.contains(e.target)&&!list.contains(e.target))list.innerHTML=''});
+  function clearBox(){box.value='';list.innerHTML='';box.focus()}
+  window._clearSearch=clearBox;
+})();
+/* ===== EVENT DELEGATION for all draft buttons ===== */
+document.addEventListener('click',function(e){
+  var t=e.target;
+  if(t.dataset&&t.dataset.draft!=null){draftPlayer(decodeURIComponent(t.dataset.draft),'theirs');if(window._clearSearch)window._clearSearch();return}
+  if(t.dataset&&t.dataset.mine!=null){draftPlayer(decodeURIComponent(t.dataset.mine),'mine');if(window._clearSearch)window._clearSearch();return}
+  if(t.dataset&&t.dataset.defpick!=null){draftDef(t.dataset.defpick);return}
+  if(t.dataset&&t.dataset.undef!=null){MYDEF=null;for(var i=ORDER.length-1;i>=0;i--){if(ORDER[i].indexOf('DEF:')===0){ORDER.splice(i,1);break}}saveDraft();refreshAll();return}
+});
+$('#btnUndo').addEventListener('click',undoLast);
+(function(){var b=$('#btnReset'),armed=false,to=null;
+  b.addEventListener('click',function(){
+    if(!armed){armed=true;b.classList.add('arm');b.textContent='Tap again to wipe draft';to=setTimeout(function(){armed=false;b.classList.remove('arm');b.textContent='Reset draft'},3000);}
+    else{clearTimeout(to);armed=false;b.classList.remove('arm');b.textContent='Reset draft';resetDraft();}
+  });
+})();
+
+$('#myWrap').innerHTML=MYKEEPERS.map(function(n){var p=idx[n];return '<article class="card"><h3>'+esc(n)+'</h3><table class="mini"><tr><td>Position rank</td><td class="hot">'+p.p+p.prk+'</td></tr><tr><td>Overall rank</td><td>'+p.rk+'</td></tr><tr><td>Projected points</td><td>'+p.pts.toFixed(0)+'</td></tr><tr><td>VORP</td><td class="hot">+'+p.v.toFixed(0)+'</td></tr><tr><td>Market ADP</td><td>'+(p.adp==null?'\u2014':p.adp)+'</td></tr><tr><td>Games projected</td><td>'+p.g+'</td></tr></table><p style="margin-top:12px">'+GRADE[n]+'</p></article>'}).join('');
+refreshAll();
+})();
+</script>
+</body>
+</html>
