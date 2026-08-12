@@ -650,6 +650,62 @@ function undoLast(){
   saveDraft(); refreshAll();
 }
 function resetDraft(){ DRAFT={};ORDER=[];MYDEF=null; saveDraft(); refreshAll(); }
+
+/* ===== YAHOO DRAFT SYNC (from the Hot Sause Draft Sync extension) =====
+   The extension delivers a 'hotsause:sync' event with the full pick list
+   {name,pos,team,...}. We match each to our player pool and auto-tag as
+   'theirs' (opponent pick). Defenses set MYDEF only if it's the user's pick
+   — but we can't know whose pick from Yahoo alone, so DEF picks by others
+   are tagged out of the pool by team. The user's own picks: matched but left
+   for the user to confirm as 'mine' (we tag 'theirs' by default; user can
+   re-tag). Safe + idempotent: never un-tags, never duplicates. */
+function syncNorm(s){return (s||'').toLowerCase().replace(/[.'\u2019]/g,'').replace(/\b(jr|sr|ii|iii|iv)\b/g,'').replace(/[^a-z]/g,'');}
+var _syncIndex=null;
+function syncIndex(){
+  if(_syncIndex)return _syncIndex;
+  _syncIndex={};
+  PLAYERS.forEach(function(p){ _syncIndex[syncNorm(p.n)]=p.n; });
+  return _syncIndex;
+}
+function matchYahooName(name,pos,team){
+  var idx=syncIndex(); var key=syncNorm(name);
+  if(idx[key])return idx[key];
+  // last-name + team fallback for tricky spellings
+  var ln=syncNorm((name||'').split(' ').slice(1).join(' '));
+  var best=null;
+  PLAYERS.forEach(function(p){
+    if(team&&p.t&&p.t.toUpperCase()!==team.toUpperCase())return;
+    if(pos&&p.p&&pos&&p.p!==pos)return;
+    if(ln&&syncNorm(p.n).indexOf(ln)>-1){ best=best||p.n; }
+  });
+  return best;
+}
+var _syncSeen={};
+function applyYahooPicks(list){
+  if(!Array.isArray(list))return;
+  var tagged=0, missed=[];
+  list.forEach(function(pk){
+    var pid=String(pk.id);
+    if(_syncSeen[pid])return;               // already processed this pick slot
+    // DEF pick? Yahoo pos would be 'DEF' — our defenses aren't in DRAFT by name,
+    // so skip auto-DEF (user picks their own DEF; opponent DEFs don't matter here).
+    if((pk.pos||'').toUpperCase()==='DEF'){ _syncSeen[pid]=true; return; }
+    var appName=matchYahooName(pk.name,pk.pos,pk.team);
+    if(appName){
+      _syncSeen[pid]=true;
+      if(!DRAFT[appName]){ DRAFT[appName]='theirs'; ORDER.push(appName); tagged++; }
+    } else {
+      missed.push(pk.name);
+    }
+  });
+  if(tagged>0){ saveDraft(); refreshAll(); }
+  if(tagged>0||missed.length){
+    console.log('[HotSause] sync: tagged '+tagged+' pick(s)'+(missed.length?'; no match for: '+missed.join(', '):''));
+  }
+}
+window.addEventListener('hotsause:sync',function(e){
+  try{ applyYahooPicks((e.detail&&e.detail.picks)||[]); }catch(err){ console.log('[HotSause] sync error',err); }
+});
 function isGone(name){return !!DRAFT[name]}          // off every board
 function isMine(name){return DRAFT[name]==='mine'}
 // live available list = static-available AND not yet drafted
