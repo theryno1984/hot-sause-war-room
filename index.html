@@ -701,27 +701,22 @@ function matchFromBoard(board){
   }
   return null;
 }
-var _syncSeen={};
 function applyYahooPicks(list){
   if(!Array.isArray(list))return;
   var tagged=0, missed=[];
   list.forEach(function(pk){
-    var pid=String(pk.id);
-    if(_syncSeen[pid])return;               // already processed this pick slot
-    if((pk.pos||'').toUpperCase()==='DEF'){ _syncSeen[pid]=true; return; }
+    if((pk.pos||'').toUpperCase()==='DEF') return;   // defenses handled via MYDEF, skip
     var appName=pk.name?matchYahooName(pk.name,pk.pos,pk.team):null;
-    // board fallback when Yahoo had no full name
     if(!appName&&pk.board){ appName=matchFromBoard(pk.board); }
     if(appName){
-      _syncSeen[pid]=true;
       if(!DRAFT[appName]){ DRAFT[appName]='theirs'; ORDER.push(appName); tagged++; }
-    } else {
-      missed.push(pk.name||('playerId '+pk.playerId));
+    } else if(pk.name){
+      missed.push(pk.name);
     }
   });
   if(tagged>0){ saveDraft(); refreshAll(); }
-  if(tagged>0||missed.length){
-    console.log('[HotSause] sync: tagged '+tagged+' pick(s)'+(missed.length?'; \u26a0 NO MATCH: '+missed.join(', '):''));
+  if(tagged>0){
+    console.log('[HotSause] sync: tagged '+tagged+' new pick(s)'+(missed.length?'; no match: '+missed.join(', '):''));
   }
 }
 window.addEventListener('hotsause:sync',function(e){
