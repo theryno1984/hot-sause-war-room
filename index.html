@@ -257,6 +257,9 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
 .rkchip{display:inline-block;padding:4px 10px;margin:0 6px 6px 0;border-radius:5px;border:1px solid #3A0710;
  background:#120206;color:#C8C8CE;font:600 12px/1.4 'Instrument Sans',sans-serif;cursor:pointer}
 .rkchip.on{background:#5A0714;border-color:#FB1F2E;color:#fff}
+.btn-sync{background:#120206;border:1px solid #3A0710;color:#8A8A93;border-radius:6px;
+ padding:8px 14px;font:700 12px/1.2 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.btn-sync.on{background:#0E3A18;border-color:#1C6E33;color:#5BE08A}
 </style>
 </head>
 <body>
@@ -409,6 +412,7 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
 </section>
 <div class="draftctl">
   <button class="btn-undo" id="btnUndo" disabled>↩ Undo last pick</button>
+  <button class="btn-sync" id="btnSync" title="Not reading Yahoo.">○ Yahoo sync off</button>
   <button class="btn-reset" id="btnReset">Reset draft</button>
 </div>
 </main>
@@ -838,7 +842,28 @@ function undoLast(){
   else { delete DRAFT[last]; }
   saveDraft(); refreshAll();
 }
-function resetDraft(){ DRAFT={};ORDER=[];MYDEF=null; saveDraft(); refreshAll(); }
+/* Yahoo sync is OFF until explicitly armed.
+   Why: the extension re-delivers its whole stored pick list on every page load,
+   and applyYahooPicks is intentionally stateless (that was the fix for picks not
+   tagging at all). Together those mean stale picks from an old mock re-tag
+   themselves after every refresh — and on draft day that would silently mark
+   AVAILABLE players as drafted. Arming it is a deliberate act. */
+var SYNCKEY='hotsause_sync_on_v1';
+var SYNC_ON=false;
+try{SYNC_ON=localStorage.getItem(SYNCKEY)==='1'}catch(e){}
+var SYNC_TAGGED=0;
+function setSync(on){
+  SYNC_ON=!!on; SYNC_TAGGED=0;
+  try{localStorage.setItem(SYNCKEY,SYNC_ON?'1':'0')}catch(e){}
+  renderSyncBar();
+}
+function renderSyncBar(){
+  var b=$('#btnSync'); if(!b)return;
+  b.className='btn-sync'+(SYNC_ON?' on':'');
+  b.textContent=SYNC_ON?('\u25CF Yahoo sync LIVE'+(SYNC_TAGGED?' \u00b7 '+SYNC_TAGGED+' tagged':'')):'\u25CB Yahoo sync off';
+  b.title=SYNC_ON?'Reading the live Yahoo draft. Tap to stop.':'Not reading Yahoo. Tap to arm when your real draft starts.';
+}
+function resetDraft(){ DRAFT={};ORDER=[];MYDEF=null; setSync(false); saveDraft(); refreshAll(); }
 
 /* ===== YAHOO DRAFT SYNC (from the Hot Sause Draft Sync extension) =====
    The extension delivers a 'hotsause:sync' event with the full pick list
@@ -909,12 +934,13 @@ function applyYahooPicks(list){
       missed.push(pk.name);
     }
   });
-  if(tagged>0){ saveDraft(); refreshAll(); }
+  if(tagged>0){ SYNC_TAGGED+=tagged; saveDraft(); refreshAll(); renderSyncBar(); }
   if(tagged>0){
     console.log('[HotSause] sync: tagged '+tagged+' new pick(s)'+(missed.length?'; no match: '+missed.join(', '):''));
   }
 }
 window.addEventListener('hotsause:sync',function(e){
+  if(!SYNC_ON){ console.log('[HotSause] sync ignored \u2014 not armed. Tap "Yahoo sync off" to enable.'); return; }
   try{ applyYahooPicks((e.detail&&e.detail.picks)||[]); }catch(err){ console.log('[HotSause] sync error',err); }
 });
 var DEFGONE={};
@@ -1294,6 +1320,8 @@ document.addEventListener('click',function(e){
   if(t.dataset&&t.dataset.undef!=null){MYDEF=null;for(var i=ORDER.length-1;i>=0;i--){if(ORDER[i].indexOf('DEF:')===0){ORDER.splice(i,1);break}}saveDraft();refreshAll();return}
 });
 $('#btnUndo').addEventListener('click',undoLast);
+$('#btnSync').addEventListener('click',function(){setSync(!SYNC_ON)});
+renderSyncBar();
 (function(){var b=$('#btnReset'),armed=false,to=null;
   b.addEventListener('click',function(){
     if(!armed){armed=true;b.classList.add('arm');b.textContent='Tap again to wipe draft';to=setTimeout(function(){armed=false;b.classList.remove('arm');b.textContent='Reset draft'},3000);}
