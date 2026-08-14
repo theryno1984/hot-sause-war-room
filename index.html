@@ -345,6 +345,7 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
   <div style="padding:0 18px 10px">
     <span class="rkchip on" data-rkpos="ALL">All skill</span><span class="rkchip" data-rkpos="RB">RB</span><span class="rkchip" data-rkpos="WR">WR</span><span class="rkchip" data-rkpos="TE">TE</span><span class="rkchip" data-rkpos="QB">QB (own scale)</span>
     <span class="rkchip on" data-rksort="cu">Sort: Cond. Upside</span><span class="rkchip" data-rksort="sw">Sort: SWING</span><span class="rkchip" data-rksort="pk">Sort: NFL pick</span>
+    <p id="rookCount" style="margin:10px 0 0;font:600 13px/1.5 'Instrument Sans',sans-serif;color:#8A8A93"></p>
   </div>
   <div class="rk-wrap"><table><thead><tr>
     <th>Player</th><th>Pos</th><th>Tm</th><th>NFL</th><th>Depth</th><th>Blocked by</th>
@@ -1086,7 +1087,9 @@ renderRounds();
 /* ===== ROOKIE BOARD ===== */
 var rkPos='ALL',rkSort='cu';
 function renderRookies(){
-  var list=PLAYERS.filter(function(p){return p.rook&&ROOKUP[p.n]&&!isGone(p.n)});
+  var allRk=PLAYERS.filter(function(p){return p.rook&&ROOKUP[p.n]});
+  var goneRk=allRk.filter(function(p){return isGone(p.n)});
+  var list=allRk.filter(function(p){return !isGone(p.n)});
   /* QB VORP runs on a different scale (baseline 327) and cannot be ranked against
      skill positions. 'All' therefore means all SKILL positions; QBs are their own view. */
   if(rkPos==='ALL')list=list.filter(function(p){return p.p!=='QB'});
@@ -1095,6 +1098,13 @@ function renderRookies(){
     if(rkSort==='pk')return A.pk-B.pk;
     return (B[rkSort]||0)-(A[rkSort]||0);});
   var mx=1;list.forEach(function(p){mx=Math.max(mx,ROOKUP[p.n].sw)});
+  var cEl=$('#rookCount');
+  if(cEl){
+    var shown=list.filter(function(p){return rkPos==='ALL'?p.p!=='QB':p.p===rkPos}).length;
+    cEl.innerHTML='<b>'+shown+'</b> on the board'+
+      (goneRk.length?' &middot; <span style="color:var(--glow)">'+goneRk.length+' already drafted'+
+        (goneRk.length<=6?' ('+goneRk.map(function(p){return esc(p.n)}).join(', ')+')':'')+'</span>':'');
+  }
   $('#rookBody').innerHTML=list.map(function(p){var u=ROOKUP[p.n];
     var w=Math.max(2,(u.sw/mx)*100);
     return '<tr><td class="name">'+esc(p.n)+' <span class="rookpin">R</span></td>'+
