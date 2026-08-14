@@ -242,6 +242,21 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
 .tgt.dimmed{opacity:.4}
 .emptytgt{padding:16px;color:var(--dim);font-size:14px;font-style:italic}
 
+.rookpin{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:4px;
+ background:#7A3B00;color:#FFB45C;font:700 10px/1.5 'JetBrains Mono',monospace;letter-spacing:.04em;vertical-align:middle}
+.rk-wrap{overflow-x:auto}
+#rookies table{width:100%;border-collapse:collapse;font-size:13px}
+#rookies th{position:sticky;top:0;background:#180207;color:#FB1F2E;font:700 11px/1.6 'Oswald',sans-serif;
+ letter-spacing:.06em;text-transform:uppercase;padding:8px 6px;text-align:left;border-bottom:1px solid #3A0710;white-space:nowrap}
+#rookies td{padding:7px 6px;border-bottom:1px solid #1C1C22;vertical-align:middle}
+#rookies td.num{font-family:'JetBrains Mono',monospace;text-align:right}
+#rookies tr:hover td{background:rgba(224,16,26,.06)}
+.swingbar{display:inline-block;min-width:74px}
+.swingbar i{display:inline-block;height:8px;background:linear-gradient(90deg,#7A3B00,#FFB45C);border-radius:2px;vertical-align:middle}
+.swingbar b{font-family:'JetBrains Mono',monospace;font-size:12px;color:#FFB45C;margin-left:6px}
+.rkchip{display:inline-block;padding:4px 10px;margin:0 6px 6px 0;border-radius:5px;border:1px solid #3A0710;
+ background:#120206;color:#C8C8CE;font:600 12px/1.4 'Instrument Sans',sans-serif;cursor:pointer}
+.rkchip.on{background:#5A0714;border-color:#FB1F2E;color:#fff}
 </style>
 </head>
 <body>
@@ -258,6 +273,7 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
   <button role="tab" aria-selected="false" data-tab="pool">Available Pool</button>
   <button role="tab" aria-selected="false" data-tab="rounds">Round Board</button>
   <button role="tab" aria-selected="false" data-tab="warroom">War Room</button>
+  <button role="tab" aria-selected="false" data-tab="rookies">Rookies</button>
   <button role="tab" aria-selected="false" data-tab="def">Defense</button>
   <button role="tab" aria-selected="false" data-tab="scoring">Scoring</button>
   <button role="tab" aria-selected="false" data-tab="league">League</button>
@@ -322,6 +338,19 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
     <article class="card"><h3>The running back pool is gone before you pick</h3><p>Seven of the eight teams ahead of you need a back, and two of them kept none at all. The model has roughly thirteen backs off the board in the eighteen picks before your first.</p><p class="tail">That is why McCaffrey and Walker are worth more than their raw numbers suggest — the realistic alternative at your pick is a +40 back, not a +90 one.</p></article>
     <article class="card"><h3>Who still needs a quarterback</h3><p>Eight of twelve teams, including the three picking immediately after you every round. But only about 1.5 quarterbacks go in the eleven picks between your first and second selection, because those same teams are starving at running back and receiver.</p><p class="tail">Average board exit: Hurts #30, Prescott #34, Goff #46, Stafford #54, Nix #60.</p></article>
   </div>
+</section>
+<section id="rookies" class="panel">
+  <div class="phead"><h2>Rookie board</h2>
+  <p class="lede">Late picks are variance buys, and VORP is an average &mdash; it deletes the exact thing you are shopping for. <b>SWING</b> is the upside you purchase: how likely the path opens, multiplied by how much better the ceiling is than the floor. Sort by SWING for a dart throw, by Conditional Upside when you still want a floor. Quarterbacks sit on their own tab &mdash; their replacement baseline is 327, so their numbers cannot be compared to skill positions.</p></div>
+  <div style="padding:0 18px 10px">
+    <span class="rkchip on" data-rkpos="ALL">All skill</span><span class="rkchip" data-rkpos="RB">RB</span><span class="rkchip" data-rkpos="WR">WR</span><span class="rkchip" data-rkpos="TE">TE</span><span class="rkchip" data-rkpos="QB">QB (own scale)</span>
+    <span class="rkchip" data-rksort="sw">Sort: SWING</span><span class="rkchip" data-rksort="cu">Sort: Cond. Upside</span><span class="rkchip" data-rksort="pk">Sort: NFL pick</span>
+  </div>
+  <div class="rk-wrap"><table><thead><tr>
+    <th>Player</th><th>Pos</th><th>Tm</th><th>NFL</th><th>Depth</th><th>Blocked by</th>
+    <th>VORP</th><th>Ceiling</th><th>Path</th><th>SWING</th><th>Cond. Up</th><th>Draft</th>
+  </tr></thead><tbody id="rookBody"></tbody></table></div>
+  <p class="foot" style="padding:12px 18px 24px">Path probability = NFL draft capital &times; depth-chart position &times; incumbent fragility (age, injury, projection gap). Ceiling = the blocker&rsquo;s role scaled by draft capital &mdash; a first-rounder inherits the job, a seventh-rounder inherits a committee slice. <b>These weights are reasoned estimates, not fitted to historical rookie outcomes.</b> Offensive-line quality and team scoring environment are not yet included.</p>
 </section>
 <section id="def" class="panel">
   <div class="rail"><p class="eyebrow">Team defense</p><h2>Worth a real pick in this format</h2>
@@ -388,217 +417,323 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
 </footer>
 <script>
 const ROWS=`
-Jahmyr Gibbs~RB~DET~307~187.9~1~1~1~1~0~16.5~Montgomery aging; new OC~0~~
-Bijan Robinson~RB~ATL~294~175.3~2~2~2~2~0~16.5~Workhorse, 80% of rush share~0~~
-De'Von Achane~RB~MIA~271~152.0~3~3~3~14~1~16~~0~~
-Jonathan Taylor~RB~IND~269~149.7~3~4~4~8~1~16~18 rush TD unrepeatable~0~~
-Omarion Hampton~RB~LAC~261~141.9~3~5~5~15~2~15.5~9 games; workhorse profile~0~~
-Christian McCaffrey~RB~SF~245~126.4~4~6~6~6~3~14.5~Age 30, 450 touches, 3.9 YPC~0~~
-Puka Nacua~WR~LAR~245~124.6~1~7~1~4~-4~15.5~129 rec = format-protected~0~~
-James Cook~RB~BUF~238~118.7~4~8~7~9~3~16~Rush title; Allen vultures TDs~0~~
-Drake Maye~QB~NE~441~114.7~1~9~1~59~6~16.5~72% cmp; AJ Brown added~0~~
-Ashton Jeanty~RB~LV~227~107.5~5~10~8~10~3~16.5~3.7 YPC rookie yr; Kubiak scheme~0~~
-Ja'Marr Chase~WR~CIN~224~103.6~2~11~2~3~-3~16~Burrow healthy = TD rebound~0~~
-Cam Skattebo~RB~NYG~221~101.6~5~12~9~41~2~14.5~Only 8 games; goal-line role~0~~
-Jaxon Smith-Njigba~WR~SEA~220~99.1~2~13~3~5~-7~16.5~OPoY; 105.5 yd/g~0~~
-Chase Brown~RB~CIN~217~98.3~5~14~10~16~3~16~Burrow health lifts scoring env~0~~
-Kenneth Walker III~RB~KC~211~92.3~5~15~11~17~5~16~KC feature back; 5 TD on 252 touches was the outlier~0~~
-Derrick Henry~RB~BAL~211~91.9~5~16~12~19~10~15.5~Age 32; zero receiving = format-neutral~0~~
-TreVeyon Henderson~RB~NE~208~89.5~5~17~13~56~8~16~Only 4 starts; Stevenson still there~1~87.4~team slate punishing
-Bucky Irving~RB~TB~208~88.9~5~18~14~53~3~15~1 rush TD in 10g; Gainwell added~1~88.9~
-Amon-Ra St. Brown~WR~DET~204~83.2~3~19~4~7~-9~16.5~LaPorta back caps RZ; 117 rec protects him~0~~
-Josh Jacobs~RB~GB~202~82.6~5~20~15~36~7~15.5~13 rush TD regression~0~~
-Josh Allen~QB~BUF~409~82.5~2~21~2~27~-5~16.5~Elite rush floor~0~~
-Trey McBride~TE~ARI~186~80.3~1~22~1~23~-10~16.5~126 rec = best format profile at TE~0~~
-Kyren Williams~RB~LAR~199~79.7~5~23~16~31~7~16~Blake Corum pressure~0~~
-Breece Hall~RB~NYJ~197~77.9~5~24~17~32~4~16~5 total TD absurdly low; Geno upgrade~1~77.9~
-Javonte Williams~RB~DAL~195~75.9~5~25~18~35~9~16~3.9 Y/R receiving = format poison~1~81.8~RB slate top-5 EASIEST
-Saquon Barkley~RB~PHI~191~72.3~5~26~19~13~7~15.5~Post-400-touch regression already hit~0~~
-Travis Etienne~RB~NO~186~67.2~5~27~20~42~11~16~New team NO; Kamara/committee risk~1~74.6~RB slate top-5 EASIEST; team slate favourable
-D'Andre Swift~RB~CHI~186~66.8~5~28~21~47~9~16~Monangai pressure~1~59.4~RB slate top-5 TOUGHEST; team slate punishing
-CeeDee Lamb~WR~DAL~186~65.6~4~29~5~11~-11~16~3 TD outlier; Pickens competition~0~~
-Brock Bowers~TE~LV~170~64.2~2~30~2~20~-8~15.5~Knee healthy; Kubiak; thin WR room~0~~
-Drake London~WR~ATL~184~62.8~4~31~6~18~-12~15.5~Only 12 games; 76.6 yd/g pace~0~~
-Rashee Rice~WR~KC~181~60.6~4~32~7~25~-8~15~71.4 yd/g pace in 8 games~0~~
-Quinshon Judkins~RB~CLE~179~59.9~5~33~22~50~11~16~Bad OL; 93% of yards after contact~1~61.7~team slate favourable
-Jeremiyah Love~RB~ARI~178~59.0~5~34~23~26~9~16~ROOKIE ARI. Allgeier/Conner/Benson competing~1~57.2~team slate punishing
-George Pickens~WR~DAL~174~53.4~5~35~8~24~-12~16~~0~~
-Tucker Kraft~TE~GB~157~50.9~3~36~3~71~-7~15~Only 8 games; 15.3 Y/R~1~46.1~TE slate top-5 TOUGHEST
-Chris Olave~WR~NO~167~46.2~6~37~9~28~-6~16~Shough QB~0~~
-A.J. Brown~WR~NE~166~44.8~6~38~10~21~-6~16~To NE with Maye~0~~
-RJ Harvey~RB~DEN~163~5.0~6~39~24~87~18~16~Clear #2 behind Dobbins; handcuff value only, not standalone~1~5.0~RB slate top-5 TOUGHEST
-Kenneth Gainwell~RB~TB~162~42.9~6~40~25~97~14~16~To TB; 174 vacated RB opportunities~1~42.9~
-Jared Goff~QB~DET~370~42.9~3~41~3~112~26~16.5~New OC Petzing; elite cmp volume~1~43.1~team slate favourable
-Jaylen Warren~RB~PIT~162~42.5~6~42~26~70~19~16~Dowdle arrives~1~42.5~
-Justin Jefferson~WR~MIN~159~38.2~7~43~11~12~-4~16.5~2 TD is a historic outlier; McCarthy risk~0~~
-Rhamondre Stevenson~RB~NE~157~38.1~6~44~27~78~19~15.5~Henderson competition~1~36.5~team slate punishing
-Zay Flowers~WR~BAL~159~37.9~7~45~12~33~-10~16.5~~1~37.9~
-Nico Collins~WR~HOU~159~37.9~7~46~13~22~-10~15.5~59% catch rate~0~~
-Christian Watson~WR~GB~157~36.1~7~47~14~62~-7~15~17.5 Y/R, only 36 catches~1~36.1~
-Bhayshul Tuten~RB~JAX~154~35.4~6~48~28~54~27~16~MODEL EST line; projected JAX lead~1~35.4~
-Jayden Reed~WR~GB~156~12.0~7~49~15~106~-8~15.5~135 vacated GB targets but unproven; tempered toward market~1~12.0~
-Rome Odunze~WR~CHI~154~33.0~7~50~16~61~-8~16~48.9% catch rate~1~26.8~WR slate top-5 TOUGHEST; team slate punishing
-Rico Dowdle~RB~PIT~152~32.6~6~51~29~85~27~16~To PIT~1~32.6~
-Dak Prescott~QB~DAL~358~31.5~4~52~4~79~21~15.5~League-leading completions~1~38.7~QB slate top-5 EASIEST
-Jacory Croskey-Merritt~RB~WAS~149~30.1~6~53~30~116~36~16~126 vacated carries in WAS~1~34.5~RB slate top-5 EASIEST
-David Montgomery~RB~HOU~148~29.3~6~54~31~52~28~15.5~To HOU as lead back~1~29.3~
-Colston Loveland~TE~CHI~135~29.1~4~55~4~39~-8~16~11.9 half-PPR ppg from Wk9 on~1~23.7~TE slate top-5 TOUGHEST; team slate punishing
-J.K. Dobbins~RB~DEN~148~29.0~6~56~32~95~35~14~RJ Harvey committee~1~24.5~RB slate top-5 TOUGHEST
-Jadarian Price~RB~SEA~147~28.0~6~57~33~63~26~15.5~ROOKIE SEA. Walker's vacated 252 touches~1~28.0~
-Dalton Kincaid~TE~BUF~133~27.5~4~58~5~120~-10~15.5~~1~26.1~team slate punishing
-Jalen Hurts~QB~PHI~353~26.6~4~59~5~67~-14~16~421 rush yds, 8 rush TD in 2025~1~37.3~QB slate top-5 EASIEST; team slate favourable
-Garrett Wilson~WR~NYJ~146~25.0~8~60~17~38~-10~16~MODEL EST line; Geno upgrade~0~~
-Tyler Warren~TE~IND~130~24.7~4~61~6~51~-8~16~~1~24.7~
-Tetairoa McMillan~WR~CAR~145~24.6~8~62~18~40~-11~16.5~ORoY; 122 tgt is the floor~1~24.6~
-Matthew Stafford~QB~LAR~350~23.1~4~63~6~98~16~15.5~MVP TD rate unrepeatable; age 38~1~19.7~
-Jameson Williams~WR~DET~144~22.9~8~64~19~55~-12~16.5~17.2 Y/R = format loser~1~24.3~team slate favourable
-Bo Nix~QB~DEN~349~21.9~4~65~7~109~4~16.5~612 att = huge cmp volume; low sacks~1~18.5~
-DeVonta Smith~WR~PHI~142~21.6~8~66~20~30~-11~16~~0~~
-Ladd McConkey~WR~LAC~142~21.1~8~67~21~43~-7~16~~1~21.1~
-Sam LaPorta~TE~DET~127~21.0~4~68~7~74~-12~15~Back from herniated disc~1~22.3~team slate favourable
-Tony Pollard~RB~TEN~139~19.7~6~69~34~72~28~15.5~~1~19.7~
-Tee Higgins~WR~CIN~140~19.1~8~70~22~37~-4~15.5~11 TD on 59 rec = big regression~0~~
-Emeka Egbuka~WR~TB~140~19.0~8~71~23~34~-13~16.5~49.6% catch rate is a red flag here~0~~
-Malik Nabers~WR~NYG~140~18.8~8~72~24~29~-13~13.5~MODEL EST line; knee recovery slow~0~~
-Kyle Pitts~TE~ATL~123~17.2~4~73~8~77~-11~16~88 rec is quietly strong here~1~20.8~TE slate top-5 EASIEST
-D.J. Moore~WR~BUF~137~16.1~8~74~25~57~-2~16.5~To BUF with Allen~1~14.7~team slate punishing
-Jaylen Waddle~WR~DEN~136~29.0~8~75~26~44~-7~16~Thrives with Nix; high ceiling despite injury history~1~29.0~
-Marvin Harrison Jr.~WR~ARI~136~14.7~8~76~27~66~-6~15.5~~1~13.4~team slate punishing
-DK Metcalf~WR~PIT~134~12.9~8~77~28~76~-3~15.5~~1~12.9~
-Jonathon Brooks~RB~CAR~131~11.7~6~78~35~89~30~14~Return from injury; Hubbard competition~1~7.7~RB slate top-5 TOUGHEST
-Justin Herbert~QB~LAC~337~10.5~5~79~8~83~-14~16~54 sacks = -54; biggest format loser~1~7.0~
-Brian Thomas Jr.~WR~JAX~131~10.3~8~80~29~69~-4~16~52.7% catch rate collapse~1~14.2~WR slate top-5 EASIEST
-Caleb Williams~QB~CHI~335~8.6~5~81~9~73~-35~16.5~58% cmp is the problem in this format~1~-8.3~QB slate top-5 TOUGHEST; team slate punishing
-Harold Fannin~TE~CLE~114~8.0~5~82~9~80~-2~16~Worst QB room in NFL~1~12.5~TE slate top-5 EASIEST; team slate favourable
-Jaxson Dart~QB~NYG~333~6.3~5~83~10~91~-34~16~Rushing floor; Nabers knee~1~2.8~
-George Kittle~TE~SF~112~6.1~5~84~10~99~3~12~Achilles; early-season risk~1~7.2~team slate favourable
-Alec Pierce~WR~IND~127~6.1~8~85~30~81~-8~15.5~21.3 Y/R = WORST profile for our scoring~1~6.1~
-Davante Adams~WR~LAR~127~6.0~8~86~31~49~-1~15~14 TD on 60 rec = extreme regression~1~6.0~
-Mike Evans~WR~SF~125~4.1~8~87~32~58~3~15~MODEL EST line; to SF age 33~1~5.3~team slate favourable
-Luther Burden~WR~CHI~125~4.0~8~88~33~46~-7~16~78.3% catch rate on limited role~1~-1.0~WR slate top-5 TOUGHEST; team slate punishing
-Michael Wilson~WR~ARI~125~3.8~8~89~34~93~-5~16~MHJ healthy = target loss~1~2.5~team slate punishing
-Jordan Love~QB~GB~330~3.5~5~90~11~130~8~16~Low sacks, low INTs = format fit~1~-0.0~
-Patrick Mahomes~QB~KC~329~2.4~5~91~12~105~-20~16~ACL cleared; Walker added~1~-14.2~QB slate top-5 TOUGHEST; team slate punishing
-Blake Corum~RB~LAR~121~2.1~7~92~36~150~35~16~Kyren pressure point~1~2.1~
-Wan'Dale Robinson~WR~TEN~122~1.5~8~93~35~103~-5~16~To TEN; 92 rec is format gold~1~1.5~
-Oronde Gadsden II~TE~LAC~107~0.9~5~94~11~133~-8~16~~1~0.8~
-Quentin Johnston~WR~LAC~121~0.1~8~95~36~88~-1~15.5~8 TD on 51 rec~1~0.1~
-Dallas Goedert~TE~PHI~106~0.0~5~96~12~111~3~15~11 TD on 60 rec~1~4.2~TE slate top-5 EASIEST; team slate favourable
-Brock Purdy~QB~SF~327~0.0~5~97~13~100~24~15~Low sacks; Evans+Kirk added; turf toe risk~1~-0.2~team slate favourable
-Tyrone Tracy Jr.~RB~NYG~119~0.0~7~98~37~180~22~15.5~Skattebo took the job~1~-0.0~
-Courtland Sutton~WR~DEN~121~0.0~8~99~37~82~-6~16~Waddle arrives~1~-0.0~
-Brenton Strange~TE~JAX~106~0.0~5~100~13~140~-8~15.5~TE8 from Wk12 on~1~-0.0~
-Jake Ferguson~TE~DAL~103~-2.3~5~101~14~119~5~16~82 rec, 7.3 Y/R - reception-driven~1~-2.4~
-Carnell Tate~WR~TEN~118~-3.1~8~102~38~65~-2~15.5~ROOKIE TEN. Ward's WR1 by camp reports~1~-3.1~
-Kyle Monangai~RB~CHI~116~-3.4~7~103~38~145~26~16~~1~-8.0~RB slate top-5 TOUGHEST; team slate punishing
-Parker Washington~WR~JAX~117~-3.6~8~104~39~68~-9~16~~1~-0.0~WR slate top-5 EASIEST
-Jordan Addison~WR~MIN~117~-3.7~8~105~40~107~0~15.5~~1~-0.2~WR slate top-5 EASIEST
-Terry McLaurin~WR~WAS~116~-4.4~8~106~41~45~-10~15~Only 10 games; Diggs added~1~-4.4~
-Jordyn Tyson~WR~NO~116~-4.5~8~107~42~75~-5~15.5~ROOKIE NO. Olave is WR1~1~-3.3~team slate favourable
-Michael Pittman Jr.~WR~PIT~116~-4.5~8~108~43~90~-1~16~To PIT~1~-4.5~
-Mark Andrews~TE~BAL~101~-5.0~5~109~15~122~4~16~Likely gone to NYG~1~-2.0~TE slate top-5 EASIEST
-Daniel Jones~QB~IND~321~-5.3~5~110~14~160~-7~15.5~68% cmp, 22 sacks: quiet format fit~1~-8.7~
-Travis Kelce~TE~KC~99~-6.3~5~111~16~108~-7~15.5~Age 37~1~-7.3~team slate punishing
-Chris Godwin~WR~TB~113~-8.0~8~112~44~83~-2~15~Evans' 116 tgts vacated~1~-8.0~
-Hunter Henry~TE~NE~98~-8.0~5~113~17~132~-4~15.5~AJ Brown arrives~1~-9.0~team slate punishing
-Joe Burrow~QB~CIN~318~-8.6~5~114~15~60~3~15~Health is the whole bet~0~~
-Trevor Lawrence~QB~JAX~317~-9.3~5~115~16~86~-51~16.5~60.9% cmp caps him here~1~-3.3~QB slate top-5 EASIEST
-Dalton Schultz~TE~HOU~95~-10.7~5~116~18~165~-5~15.5~~1~-10.8~
-Jakobi Meyers~WR~JAX~108~-12.5~8~117~45~110~-3~16~~1~-9.3~WR slate top-5 EASIEST
-Juwan Johnson~TE~NO~93~-12.8~5~118~19~150~-6~15.5~~1~-11.9~team slate favourable
-Jordan Mason~RB~MIN~105~-13.5~8~119~39~160~21~15.5~~1~-13.5~
-Kimani Vidal~RB~LAC~105~-14.1~8~120~40~155~17~15~Hampton lead~1~-14.1~
-Xavier Worthy~WR~KC~105~-15.5~8~121~46~128~-2~16~~1~-19.7~WR slate top-5 TOUGHEST; team slate punishing
-Chuba Hubbard~RB~CAR~102~-16.7~8~122~41~84~16~15~~1~-19.8~RB slate top-5 TOUGHEST
-Josh Downs~WR~IND~103~-17.3~8~123~47~94~1~16~~1~-17.3~
-Jayden Higgins~WR~HOU~103~-17.4~8~124~48~138~1~16~~1~-14.3~WR slate top-5 EASIEST
-Zach Charbonnet~RB~SEA~101~-17.9~8~125~42~118~18~13~~1~-17.9~
-Woody Marks~RB~HOU~101~-18.2~8~126~43~170~15~15.5~~1~-18.2~
-Stefon Diggs~WR~WAS~101~-5.0~8~127~49~121~-4~15~Strong late-round value; still WR3 upside in WAS~1~-5.0~
-C.J. Stroud~QB~HOU~307~-19.9~6~128~17~140~-13~16~~1~-23.4~
-Romeo Doubs~WR~GB~99~-21.5~8~129~50~155~-1~15.5~~1~-21.5~
-Sam Darnold~QB~SEA~305~-21.8~6~130~18~150~-12~16.5~~1~-25.3~
-Deebo Samuel~WR~WAS~98~-22.7~8~131~51~150~0~15.5~~1~-22.7~
-Isaiah Likely~TE~NYG~82~-23.7~6~132~20~114~-2~15.5~~1~-23.7~
-Baker Mayfield~QB~TB~303~-24.0~6~133~19~145~-32~16.5~~1~-27.5~
-Elic Ayomanor~WR~TEN~96~-24.8~8~134~52~142~-1~16~~1~-24.8~
-Khalil Shakir~WR~BUF~96~-25.2~8~135~53~125~-3~16~~1~-26.2~team slate punishing
-Bryce Young~QB~CAR~299~-27.2~6~136~20~150~-20~16.5~~1~-30.7~
-Ricky Pearsall~WR~SF~93~-28.0~8~137~54~130~-11~15~~1~-27.1~team slate favourable
-Theo Johnson~TE~NYG~76~-29.9~7~138~21~175~-2~15.5~~1~-30.0~
-Makai Lemon~WR~PHI~91~-30.1~8~139~55~96~-4~15~~1~-26.5~WR slate top-5 EASIEST; team slate favourable
-Troy Franklin~WR~DEN~89~-32.0~8~140~56~135~-1~16~~1~-32.0~
-Chig Okonkwo~TE~TEN~71~-34.9~7~141~22~170~1~16~~1~-34.9~
-Keenan Allen~WR~LAC~83~-38.0~9~142~57~145~2~15~~1~-38.0~
-Jauan Jennings~WR~SF~75~-45.7~10~143~58~160~2~15~~1~-45.0~team slate favourable
-Lamar Jackson~QB~BAL~265~-61.6~7~144~21~48~-22~15~36 sacks in 13 games hurts here~0~~
-Jayden Daniels~QB~WAS~255~-72.0~8~145~22~64~-11~15~Only 7 games in 2025~1~-75.5~
-Geno Smith~QB~NYJ~216~-110.1~9~146~23~175~0~16~17 INT + 55 sacks~1~-120.1~QB slate top-5 TOUGHEST
-Tua Tagovailoa~QB~MIA~209~-118.1~9~147~24~170~0~15~15 INT~1~-129.9~QB slate top-5 TOUGHEST; team slate punishing
-Emmett Johnson~RB~KC~108~-3.0~9~0~44~178~0~~~1~-3.0~
-Braelon Allen~RB~NYJ~109~-1.3~9~0~45~179~0~~~1~-1.3~
-Kayshon Boutte~WR~NE~103~-32.0~9~0~59~180~0~~Requested trade; squeezed by AJ Brown - roster risk~1~-32.0~
-Jordan James~RB~SF~107~-4.5~9~0~46~183~0~~~1~-4.5~
-Kaelon Black~RB~SF~108~-2.8~9~0~47~184~0~~~1~-2.8~
-James Conner~RB~ARI~106~-20.0~9~0~48~185~0~~Trey Benson likely takes over mid-season barring injury~1~-20.0~
-Cooper Kupp~WR~SEA~103~-10.4~9~0~60~186~0~~~1~-10.4~
-Justice Hill~RB~BAL~106~-6.0~9~0~49~188~0~~~1~-6.0~
-Rashod Bateman~WR~BAL~100~-13.6~9~0~61~190~0~~~1~-13.6~
-Ryan Flournoy~WR~DAL~101~-13.5~9~0~62~193~0~~~1~-13.5~
-Tre' Harris~WR~LAC~99~-15.1~9~0~63~195~0~~~1~-15.1~
-Jaydon Blue~RB~DAL~106~-5.7~9~0~50~197~0~~~1~-5.7~
-Isaac TeSlaa~WR~DET~100~-15.0~9~0~64~198~0~~~1~-15.0~
-MarShawn Lloyd~RB~GB~104~-8.9~9~0~51~201~0~~~1~-8.9~
-Ray Davis~RB~BUF~105~-7.2~9~0~52~202~0~~~1~-7.2~
-Dontayvion Wicks~WR~PHI~100~-14.7~9~0~65~207~0~~~1~-14.7~
-Mike Washington Jr.~RB~LV~102~-12.0~9~0~53~208~0~~~1~-12.0~
-Gunnar Helm~TE~TEN~72~-22.3~9~0~23~209~0~~~1~-22.3~
-Pat Freiermuth~TE~PIT~70~-25.6~9~0~24~210~0~~~1~-25.6~
-Zachariah Branch~WR~ATL~99~-16.2~9~0~66~212~0~~~1~-16.2~
-Cade Otton~TE~TB~70~-25.5~9~0~25~213~0~~~1~-25.5~
-Kaytron Allen~RB~WAS~99~-15.1~9~0~54~215~0~~~1~-15.1~
-Sean Tucker~RB~TB~101~-13.4~9~0~55~216~0~~~1~-13.4~
-Nicholas Singleton~RB~TEN~102~-11.7~9~0~56~217~0~~~1~-11.7~
-Darnell Mooney~WR~NYG~96~-19.3~9~0~67~219~0~~~1~-19.3~
-George Holani~RB~SEA~98~-16.6~9~0~57~220~0~~~1~-16.6~
-David Njoku~TE~LAC~70~-25.2~9~0~26~222~0~~~1~-25.2~
-Demond Claiborne~RB~MIN~98~-16.5~9~0~58~223~0~~~1~-16.5~
-Cyrus Allen~WR~KC~94~-22.4~9~0~68~226~0~~~1~-22.4~
-Emanuel Wilson~RB~SEA~97~-18.0~9~0~59~228~0~~~1~-18.0~
-Christian Kirk~WR~SF~94~-30.0~9~0~69~229~0~~Deebo arrival squeezes targets; Purdy spreads it~1~-30.0~
-Pat Bryant~WR~DEN~92~-25.6~9~0~70~230~0~~~1~-25.6~
-Malachi Fields~WR~NYG~93~-23.9~9~0~71~231~0~~~1~-23.9~
-Eli Stowers~TE~PHI~66~-31.5~9~0~27~233~0~~~1~-31.5~
-Emari Demercado~RB~KC~98~-17.8~9~0~60~234~0~~~1~-17.8~
-Jaylin Noel~WR~HOU~92~-25.4~9~0~72~236~0~~~1~-25.4~
-Ollie Gordon~RB~MIA~98~-17.7~9~0~61~237~0~~~1~-17.7~
-Jack Bech~WR~LV~91~-27.0~9~0~73~238~0~~~1~-27.0~
-DJ Giddens~RB~IND~96~-19.3~9~0~62~239~0~~~1~-19.3~
-Mason Taylor~TE~NYJ~66~-31.2~9~0~28~242~0~~~1~-31.2~
-Skyler Bell~WR~BUF~91~-26.7~9~0~74~247~0~~~1~-26.7~
-Devontez Walker~WR~BAL~90~-28.3~9~0~75~249~0~~~1~-28.3~
-Colby Parkinson~TE~LAR~63~-35.8~9~0~29~254~0~~~1~-35.8~
-Germie Bernard~WR~PIT~88~-31.4~9~0~76~256~0~~~1~-31.4~
-Evan Engram~TE~DEN~61~-39.0~9~0~30~258~0~~~1~-39.0~
-Ted Hurst~WR~TB~87~-32.9~9~0~77~261~0~~~1~-32.9~
-Ja'Kobi Lane~WR~BAL~86~-34.5~9~0~78~263~0~~~1~-34.5~
-Mike Gesicki~TE~CIN~59~-42.1~9~0~31~265~0~~~1~-42.1~
-Jake Tonges~TE~SF~60~-40.4~9~0~32~266~0~~~1~-40.4~
-Jaylen Wright~RB~MIA~89~-29.9~9~0~63~271~0~~~1~-29.9~
-Keon Coleman~WR~BUF~86~-34.2~9~0~79~272~0~~~1~-34.2~
-Samaje Perine~RB~CIN~88~-31.5~9~0~64~273~0~~~1~-31.5~
-Darnell Washington~TE~PIT~58~-43.4~9~0~33~276~0~~~1~-43.4~
-Tory Horton~WR~SEA~85~-35.7~9~0~80~277~0~~~1~-35.7~
-Tyquan Thornton~WR~KC~83~-39.0~9~0~81~278~0~~~1~-39.0~
-Chris Bell~WR~MIA~82~-40.6~9~0~82~280~0~~~1~-40.6~
-LeQuint Allen~RB~JAX~87~-32.9~9~0~65~281~0~~~1~-32.9~
-Ty Johnson~RB~BUF~88~-31.2~9~0~66~282~0~~~1~-31.2~
-Isaiah Davis~RB~NYJ~85~-36.1~9~0~67~285~0~~~1~-36.1~
-Jalen Tolbert~WR~MIA~81~-42.0~9~0~83~288~0~~~1~-42.0~
-Jahan Dotson~WR~ATL~81~-41.9~9~0~84~291~0~~~1~-41.9~
-Andrei Iosivas~WR~CIN~80~-43.5~9~0~85~293~0~~~1~-43.5~
-Hollywood Brown~WR~PHI~81~-41.8~9~0~86~294~0~~~1~-41.8~
-Zavion Thomas~WR~CHI~80~-43.4~9~0~87~296~0~~~1~-43.4~
+Jahmyr Gibbs~RB~DET~307~187.9~1~1~1~1~0~16.5~Montgomery aging; new OC~0~~~0
+Bijan Robinson~RB~ATL~294~175.3~2~2~2~2~0~16.5~Workhorse, 80% of rush share~0~~~0
+De'Von Achane~RB~MIA~271~152.0~3~3~3~14~1~16~~0~~~0
+Jonathan Taylor~RB~IND~269~149.7~3~4~4~8~1~16~18 rush TD unrepeatable~0~~~0
+Omarion Hampton~RB~LAC~261~141.9~3~5~5~15~2~15.5~9 games; workhorse profile~0~~~0
+Christian McCaffrey~RB~SF~245~126.4~4~6~6~6~3~14.5~Age 30, 450 touches, 3.9 YPC~0~~~0
+Puka Nacua~WR~LAR~245~124.6~1~7~1~4~-4~15.5~129 rec = format-protected~0~~~0
+James Cook~RB~BUF~238~118.7~4~8~7~9~3~16~Rush title; Allen vultures TDs~0~~~0
+Drake Maye~QB~NE~441~114.7~1~9~1~59~6~16.5~72% cmp; AJ Brown added~0~~~0
+Ashton Jeanty~RB~LV~227~107.5~5~10~8~10~3~16.5~3.7 YPC rookie yr; Kubiak scheme~0~~~0
+Ja'Marr Chase~WR~CIN~224~103.6~2~11~2~3~-3~16~Burrow healthy = TD rebound~0~~~0
+Cam Skattebo~RB~NYG~221~101.6~5~12~9~41~2~14.5~Only 8 games; goal-line role~0~~~0
+Jaxon Smith-Njigba~WR~SEA~220~99.1~2~13~3~5~-7~16.5~OPoY; 105.5 yd/g~0~~~0
+Chase Brown~RB~CIN~217~98.3~5~14~10~16~3~16~Burrow health lifts scoring env~0~~~0
+Kenneth Walker III~RB~KC~211~92.3~5~15~11~17~5~16~KC feature back; 5 TD on 252 touches was the outlier~0~~~0
+Derrick Henry~RB~BAL~211~91.9~5~16~12~19~10~15.5~Age 32; zero receiving = format-neutral~0~~~0
+TreVeyon Henderson~RB~NE~208~89.5~5~17~13~56~8~16~Only 4 starts; Stevenson still there~1~87.4~team slate punishing~0
+Bucky Irving~RB~TB~208~88.9~5~18~14~53~3~15~1 rush TD in 10g; Gainwell added~1~88.9~~0
+Amon-Ra St. Brown~WR~DET~204~83.2~3~19~4~7~-9~16.5~LaPorta back caps RZ; 117 rec protects him~0~~~0
+Josh Jacobs~RB~GB~202~82.6~5~20~15~36~7~15.5~13 rush TD regression~0~~~0
+Josh Allen~QB~BUF~409~82.5~2~21~2~27~-5~16.5~Elite rush floor~0~~~0
+Trey McBride~TE~ARI~186~80.3~1~22~1~23~-10~16.5~126 rec = best format profile at TE~0~~~0
+Kyren Williams~RB~LAR~199~79.7~5~23~16~31~7~16~Blake Corum pressure~0~~~0
+Breece Hall~RB~NYJ~197~77.9~5~24~17~32~4~16~5 total TD absurdly low; Geno upgrade~1~77.9~~0
+Javonte Williams~RB~DAL~195~75.9~5~25~18~35~9~16~3.9 Y/R receiving = format poison~1~81.8~RB slate top-5 EASIEST~0
+Saquon Barkley~RB~PHI~191~72.3~5~26~19~13~7~15.5~Post-400-touch regression already hit~0~~~0
+Travis Etienne~RB~NO~186~67.2~5~27~20~42~11~16~New team NO; Kamara/committee risk~1~74.6~RB slate top-5 EASIEST; team slate favourable~0
+D'Andre Swift~RB~CHI~186~66.8~5~28~21~47~9~16~Monangai pressure~1~59.4~RB slate top-5 TOUGHEST; team slate punishing~0
+CeeDee Lamb~WR~DAL~186~65.6~4~29~5~11~-11~16~3 TD outlier; Pickens competition~0~~~0
+Brock Bowers~TE~LV~170~64.2~2~30~2~20~-8~15.5~Knee healthy; Kubiak; thin WR room~0~~~0
+Drake London~WR~ATL~184~62.8~4~31~6~18~-12~15.5~Only 12 games; 76.6 yd/g pace~0~~~0
+Rashee Rice~WR~KC~181~60.6~4~32~7~25~-8~15~71.4 yd/g pace in 8 games~0~~~0
+Quinshon Judkins~RB~CLE~179~59.9~5~33~22~50~11~16~Bad OL; 93% of yards after contact~1~61.7~team slate favourable~0
+Jeremiyah Love~RB~ARI~178~59.0~5~34~23~26~9~16~ROOKIE ARI. Allgeier/Conner/Benson competing~1~57.2~team slate punishing~1
+George Pickens~WR~DAL~174~53.4~5~35~8~24~-12~16~~0~~~0
+Tucker Kraft~TE~GB~157~50.9~3~36~3~71~-7~15~Only 8 games; 15.3 Y/R~1~46.1~TE slate top-5 TOUGHEST~0
+Chris Olave~WR~NO~167~46.2~6~37~9~28~-6~16~Shough QB~0~~~0
+A.J. Brown~WR~NE~166~44.8~6~38~10~21~-6~16~To NE with Maye~0~~~0
+Kenneth Gainwell~RB~TB~162~42.9~6~39~24~97~14~16~To TB; 174 vacated RB opportunities~1~42.9~~0
+Jared Goff~QB~DET~370~42.9~3~40~3~112~26~16.5~New OC Petzing; elite cmp volume~1~43.1~team slate favourable~0
+Jaylen Warren~RB~PIT~162~42.5~6~41~25~70~19~16~Dowdle arrives~1~42.5~~0
+Justin Jefferson~WR~MIN~159~38.2~7~42~11~12~-4~16.5~2 TD is a historic outlier; McCarthy risk~0~~~0
+Rhamondre Stevenson~RB~NE~157~38.1~6~43~26~78~19~15.5~Henderson competition~1~36.5~team slate punishing~0
+Zay Flowers~WR~BAL~159~37.9~7~44~12~33~-10~16.5~~1~37.9~~0
+Nico Collins~WR~HOU~159~37.9~7~45~13~22~-10~15.5~59% catch rate~0~~~0
+Christian Watson~WR~GB~157~36.1~7~46~14~62~-7~15~17.5 Y/R, only 36 catches~1~36.1~~0
+Bhayshul Tuten~RB~JAX~154~35.4~6~47~27~54~27~16~MODEL EST line; projected JAX lead~1~35.4~~0
+Rome Odunze~WR~CHI~154~33.0~7~48~15~61~-8~16~48.9% catch rate~1~26.8~WR slate top-5 TOUGHEST; team slate punishing~0
+Rico Dowdle~RB~PIT~152~32.6~6~49~28~85~27~16~To PIT~1~32.6~~0
+Dak Prescott~QB~DAL~358~31.5~4~50~4~79~21~15.5~League-leading completions~1~38.7~QB slate top-5 EASIEST~0
+Jacory Croskey-Merritt~RB~WAS~149~30.1~6~51~29~116~36~16~126 vacated carries in WAS~1~34.5~RB slate top-5 EASIEST~0
+David Montgomery~RB~HOU~148~29.3~6~52~30~52~28~15.5~To HOU as lead back~1~29.3~~0
+Colston Loveland~TE~CHI~135~29.1~4~53~4~39~-8~16~11.9 half-PPR ppg from Wk9 on~1~23.7~TE slate top-5 TOUGHEST; team slate punishing~0
+J.K. Dobbins~RB~DEN~148~29.0~6~54~31~95~35~14~RJ Harvey committee~1~24.5~RB slate top-5 TOUGHEST~0
+Jaylen Waddle~WR~DEN~136~29.0~8~55~16~44~-7~16~Thrives with Nix; high ceiling despite injury history~1~29.0~~0
+Jadarian Price~RB~SEA~147~28.0~6~56~32~63~26~15.5~ROOKIE SEA. Walker's vacated 252 touches~1~28.0~~1
+Dalton Kincaid~TE~BUF~133~27.5~4~57~5~120~-10~15.5~~1~26.1~team slate punishing~0
+Jalen Hurts~QB~PHI~353~26.6~4~58~5~67~-14~16~421 rush yds, 8 rush TD in 2025~1~37.3~QB slate top-5 EASIEST; team slate favourable~0
+Garrett Wilson~WR~NYJ~146~25.0~8~59~17~38~-10~16~MODEL EST line; Geno upgrade~0~~~0
+Tyler Warren~TE~IND~130~24.7~4~60~6~51~-8~16~~1~24.7~~0
+Tetairoa McMillan~WR~CAR~145~24.6~8~61~18~40~-11~16.5~ORoY; 122 tgt is the floor~1~24.6~~0
+Matthew Stafford~QB~LAR~350~23.1~4~62~6~98~16~15.5~MVP TD rate unrepeatable; age 38~1~19.7~~0
+Jameson Williams~WR~DET~144~22.9~8~63~19~55~-12~16.5~17.2 Y/R = format loser~1~24.3~team slate favourable~0
+Bo Nix~QB~DEN~349~21.9~4~64~7~109~4~16.5~612 att = huge cmp volume; low sacks~1~18.5~~0
+DeVonta Smith~WR~PHI~142~21.6~8~65~20~30~-11~16~~0~~~0
+Ladd McConkey~WR~LAC~142~21.1~8~66~21~43~-7~16~~1~21.1~~0
+Sam LaPorta~TE~DET~127~21.0~4~67~7~74~-12~15~Back from herniated disc~1~22.3~team slate favourable~0
+Tony Pollard~RB~TEN~139~19.7~6~68~33~72~28~15.5~~1~19.7~~0
+Tee Higgins~WR~CIN~140~19.1~8~69~22~37~-4~15.5~11 TD on 59 rec = big regression~0~~~0
+Emeka Egbuka~WR~TB~140~19.0~8~70~23~34~-13~16.5~49.6% catch rate is a red flag here~0~~~0
+Malik Nabers~WR~NYG~140~18.8~8~71~24~29~-13~13.5~MODEL EST line; knee recovery slow~0~~~0
+Kyle Pitts~TE~ATL~123~17.2~4~72~8~77~-11~16~88 rec is quietly strong here~1~20.8~TE slate top-5 EASIEST~0
+D.J. Moore~WR~BUF~137~16.1~8~73~25~57~-2~16.5~To BUF with Allen~1~14.7~team slate punishing~0
+Marvin Harrison Jr.~WR~ARI~136~14.7~8~74~26~66~-6~15.5~~1~13.4~team slate punishing~0
+DK Metcalf~WR~PIT~134~12.9~8~75~27~76~-3~15.5~~1~12.9~~0
+Jayden Reed~WR~GB~156~12.0~7~76~28~106~-8~15.5~135 vacated GB targets but unproven; tempered toward market~1~12.0~~0
+Jonathon Brooks~RB~CAR~131~11.7~6~77~34~89~30~14~Return from injury; Hubbard competition~1~7.7~RB slate top-5 TOUGHEST~0
+Justin Herbert~QB~LAC~337~10.5~5~78~8~83~-14~16~54 sacks = -54; biggest format loser~1~7.0~~0
+Brian Thomas Jr.~WR~JAX~131~10.3~8~79~29~69~-4~16~52.7% catch rate collapse~1~14.2~WR slate top-5 EASIEST~0
+Caleb Williams~QB~CHI~335~8.6~5~80~9~73~-35~16.5~58% cmp is the problem in this format~1~-8.3~QB slate top-5 TOUGHEST; team slate punishing~0
+Harold Fannin~TE~CLE~114~8.0~5~81~9~80~-2~16~Worst QB room in NFL~1~12.5~TE slate top-5 EASIEST; team slate favourable~0
+Jaxson Dart~QB~NYG~333~6.3~5~82~10~91~-34~16~Rushing floor; Nabers knee~1~2.8~~0
+George Kittle~TE~SF~112~6.1~5~83~10~99~3~12~Achilles; early-season risk~1~7.2~team slate favourable~0
+Alec Pierce~WR~IND~127~6.1~8~84~30~81~-8~15.5~21.3 Y/R = WORST profile for our scoring~1~6.1~~0
+Davante Adams~WR~LAR~127~6.0~8~85~31~49~-1~15~14 TD on 60 rec = extreme regression~1~6.0~~0
+RJ Harvey~RB~DEN~163~5.0~6~86~35~87~18~16~Clear #2 behind Dobbins; handcuff value only, not standalone~1~5.0~RB slate top-5 TOUGHEST~0
+Chris Rodriguez Jr.~RB~JAX~123~4.5~6~87~36~196~1~~~1~4.5~~0
+Mike Evans~WR~SF~125~4.1~8~88~32~58~3~15~MODEL EST line; to SF age 33~1~5.3~team slate favourable~0
+Luther Burden~WR~CHI~125~4.0~8~89~33~46~-7~16~78.3% catch rate on limited role~1~-1.0~WR slate top-5 TOUGHEST; team slate punishing~0
+Michael Wilson~WR~ARI~125~3.8~8~90~34~93~-5~16~MHJ healthy = target loss~1~2.5~team slate punishing~0
+Jordan Love~QB~GB~330~3.5~5~91~11~130~8~16~Low sacks, low INTs = format fit~1~-0.0~~0
+Patrick Mahomes~QB~KC~329~2.4~5~92~12~105~-20~16~ACL cleared; Walker added~1~-14.2~QB slate top-5 TOUGHEST; team slate punishing~0
+Blake Corum~RB~LAR~121~2.1~7~93~37~150~35~16~Kyren pressure point~1~2.1~~0
+Wan'Dale Robinson~WR~TEN~122~1.5~8~94~35~103~-5~16~To TEN; 92 rec is format gold~1~1.5~~0
+Oronde Gadsden II~TE~LAC~107~0.9~5~95~11~133~-8~16~~1~0.8~~0
+Quentin Johnston~WR~LAC~121~0.1~8~96~36~88~-1~15.5~8 TD on 51 rec~1~0.1~~0
+Dallas Goedert~TE~PHI~106~0.0~5~97~12~111~3~15~11 TD on 60 rec~1~4.2~TE slate top-5 EASIEST; team slate favourable~0
+Brock Purdy~QB~SF~327~0.0~5~98~13~100~24~15~Low sacks; Evans+Kirk added; turf toe risk~1~-0.2~team slate favourable~0
+Tyrone Tracy Jr.~RB~NYG~119~0.0~7~99~38~180~22~15.5~Skattebo took the job~1~-0.0~~0
+Courtland Sutton~WR~DEN~121~0.0~8~100~37~82~-6~16~Waddle arrives~1~-0.0~~0
+Brenton Strange~TE~JAX~106~0.0~5~101~13~140~-8~15.5~TE8 from Wk12 on~1~-0.0~~0
+Jake Ferguson~TE~DAL~103~-2.3~5~102~14~119~5~16~82 rec, 7.3 Y/R - reception-driven~1~-2.4~~0
+Carnell Tate~WR~TEN~118~-3.1~8~103~38~65~-2~15.5~ROOKIE TEN. Ward's WR1 by camp reports~1~-3.1~~1
+Kyle Monangai~RB~CHI~116~-3.4~7~104~39~145~26~16~~1~-8.0~RB slate top-5 TOUGHEST; team slate punishing~0
+Parker Washington~WR~JAX~117~-3.6~8~105~39~68~-9~16~~1~-0.0~WR slate top-5 EASIEST~0
+Jordan Addison~WR~MIN~117~-3.7~8~106~40~107~0~15.5~~1~-0.2~WR slate top-5 EASIEST~0
+Terry McLaurin~WR~WAS~116~-4.4~8~107~41~45~-10~15~Only 10 games; Diggs added~1~-4.4~~0
+Jordyn Tyson~WR~NO~116~-4.5~8~108~42~75~-5~15.5~ROOKIE NO. Olave is WR1~1~-3.3~team slate favourable~1
+Michael Pittman Jr.~WR~PIT~116~-4.5~8~109~43~90~-1~16~To PIT~1~-4.5~~0
+Mark Andrews~TE~BAL~101~-5.0~5~110~15~122~4~16~Likely gone to NYG~1~-2.0~TE slate top-5 EASIEST~0
+Stefon Diggs~WR~WAS~101~-5.0~8~111~44~121~-4~15~Strong late-round value; still WR3 upside in WAS~1~-5.0~~0
+Aaron Jones Sr.~RB~MIN~114~-5.1~7~112~40~128~-2~~~1~-5.1~~0
+Matthew Golden~WR~GB~116~-5.2~8~113~45~167~-4~~~1~-5.2~~0
+Daniel Jones~QB~IND~321~-5.3~5~114~14~160~-7~15.5~68% cmp, 22 sacks: quiet format fit~1~-8.7~~0
+T.J. Hockenson~TE~MIN~101~-5.4~3~115~16~174~1~~~1~-5.4~~0
+Travis Kelce~TE~KC~99~-6.3~5~116~17~108~-7~15.5~Age 37~1~-7.3~team slate punishing~0
+Chris Godwin~WR~TB~113~-8.0~8~117~46~83~-2~15~Evans' 116 tgts vacated~1~-8.0~~0
+Hunter Henry~TE~NE~98~-8.0~5~118~18~132~-4~15.5~AJ Brown arrives~1~-9.0~team slate punishing~0
+Joe Burrow~QB~CIN~318~-8.6~5~119~15~60~3~15~Health is the whole bet~0~~~0
+Trevor Lawrence~QB~JAX~317~-9.3~5~120~16~86~-51~16.5~60.9% cmp caps him here~1~-3.3~QB slate top-5 EASIEST~0
+Jalen Coker~WR~CAR~111~-9.8~8~121~47~202~1~~~1~-9.8~~0
+Tyler Shough~QB~NO~317~-9.9~5~122~17~170~2~~~1~-9.9~~0
+AJ Barner~TE~SEA~96~-10.1~4~123~19~144~1~~~1~-10.1~~0
+Dalton Schultz~TE~HOU~95~-10.7~5~124~20~165~-5~15.5~~1~-10.8~~0
+Kyler Murray~QB~MIN~315~-11.9~5~125~18~111~3~~~1~-11.9~~0
+Jakobi Meyers~WR~JAX~108~-12.5~8~126~48~110~-3~16~~1~-9.3~WR slate top-5 EASIEST~0
+Juwan Johnson~TE~NO~93~-12.8~5~127~21~150~-6~15.5~~1~-11.9~team slate favourable~0
+Jordan Mason~RB~MIN~105~-13.5~8~128~41~160~21~15.5~~1~-13.5~~0
+Kimani Vidal~RB~LAC~105~-14.1~8~129~42~155~17~15~Hampton lead~1~-14.1~~0
+Rachaad White~RB~WAS~105~-14.2~8~130~43~125~-3~~~1~-14.2~~0
+KC Concepcion~WR~CLE~106~-14.9~9~131~49~189~6~~~1~-14.9~~1
+Xavier Worthy~WR~KC~105~-15.5~8~132~50~128~-2~16~~1~-19.7~WR slate top-5 TOUGHEST; team slate punishing~0
+Chuba Hubbard~RB~CAR~102~-16.7~8~133~44~84~16~15~~1~-19.8~RB slate top-5 TOUGHEST~0
+Josh Downs~WR~IND~103~-17.3~8~134~51~94~1~16~~1~-17.3~~0
+Jayden Higgins~WR~HOU~103~-17.4~8~135~52~138~1~16~~1~-14.3~WR slate top-5 EASIEST~0
+Zach Charbonnet~RB~SEA~101~-17.9~8~136~45~118~18~13~~1~-17.9~~0
+Woody Marks~RB~HOU~101~-18.2~8~137~46~170~15~15.5~~1~-18.2~~0
+C.J. Stroud~QB~HOU~307~-19.9~6~138~19~140~-13~16~~1~-23.4~~0
+Pat Freiermuth~TE~PIT~85~-20.7~4~139~22~210~2~~~1~-20.7~~0
+Romeo Doubs~WR~GB~99~-21.5~8~140~53~155~-1~15.5~~1~-21.5~~0
+Sam Darnold~QB~SEA~305~-21.8~6~141~20~150~-12~16.5~~1~-25.3~~0
+Gunnar Helm~TE~TEN~84~-22.4~4~142~23~209~2~~~1~-22.4~~0
+Deebo Samuel~WR~WAS~98~-22.7~8~143~54~150~0~15.5~~1~-22.7~~0
+Isaiah Likely~TE~NYG~82~-23.7~6~144~24~114~-2~15.5~~1~-23.7~~0
+Malik Willis~QB~MIA~303~-23.8~6~145~21~136~-1~~~1~-23.8~~0
+Darren Waller~TE~CAR~82~-23.9~5~146~25~355~1~~~1~-23.9~~0
+Baker Mayfield~QB~TB~303~-24.0~6~147~22~145~-32~16.5~~1~-27.5~~0
+Elic Ayomanor~WR~TEN~96~-24.8~8~148~55~142~-1~16~~1~-24.8~~0
+Khalil Shakir~WR~BUF~96~-25.2~8~149~56~125~-3~16~~1~-26.2~team slate punishing~0
+Rashid Shaheed~WR~SEA~96~-25.2~9~150~57~166~0~~~1~-25.2~~0
+Cade Otton~TE~TB~79~-27.1~5~151~26~213~1~~~1~-27.1~~0
+Bryce Young~QB~CAR~299~-27.2~6~152~23~150~-20~16.5~~1~-30.7~~0
+Ricky Pearsall~WR~SF~93~-28.0~8~153~58~130~-11~15~~1~-27.1~team slate favourable~0
+Tyjae Spears~RB~TEN~91~-28.1~8~154~47~199~-4~~~1~-28.1~~0
+Theo Johnson~TE~NYG~76~-29.9~7~155~27~175~-2~15.5~~1~-30.0~~0
+Makai Lemon~WR~PHI~91~-30.1~8~156~59~96~-4~15~~1~-26.5~WR slate top-5 EASIEST; team slate favourable~1
+Troy Franklin~WR~DEN~89~-32.0~8~157~60~135~-1~16~~1~-32.0~~0
+Jalen Nailor~WR~LV~88~-32.7~9~158~61~178~-3~~~1~-32.7~~0
+Keaton Mitchell~RB~LAC~85~-33.5~8~159~48~194~-4~~~1~-33.5~~0
+Greg Dulcich~TE~MIA~72~-33.7~5~160~28~197~0~~~1~-33.7~~0
+Jalen McMillan~WR~TB~87~-34.0~9~161~62~173~-3~~~1~-34.0~~0
+De'Zhaun Stribling~WR~SF~86~-34.8~9~162~63~190~-3~~~1~-34.8~~1
+Chig Okonkwo~TE~TEN~71~-34.9~7~163~29~170~1~16~~1~-34.9~~0
+Omar Cooper Jr.~WR~NYJ~86~-35.0~9~164~64~181~-3~~~1~-35.0~~1
+Terrance Ferguson~TE~LAR~69~-36.8~5~165~30~151~0~~~1~-36.8~~0
+Mike Gesicki~TE~CIN~69~-36.9~6~166~31~265~-2~~~1~-36.9~~0
+Keenan Allen~WR~LAC~83~-38.0~9~167~65~145~2~15~~1~-38.0~~0
+Kenyon Sadiq~TE~NYJ~67~-39.5~6~168~32~168~-1~~~1~-39.5~~1
+Denzel Boston~WR~CLE~81~-39.7~9~169~66~182~-4~~~1~-39.7~~1
+Ryan Flournoy~WR~DAL~80~-41.3~9~170~67~193~-3~~~1~-41.3~~0
+Jerry Jeudy~WR~CLE~79~-42.0~9~171~68~233~-5~~~1~-42.0~~0
+Mason Taylor~TE~NYJ~64~-42.3~6~172~33~242~-1~~~1~-42.3~~0
+Tre' Harris~WR~LAC~77~-43.8~9~173~69~195~-4~~~1~-43.8~~0
+Dylan Sampson~RB~CLE~73~-45.6~9~174~49~186~-4~~~1~-45.6~~0
+Jauan Jennings~WR~SF~75~-45.7~10~175~70~160~2~15~~1~-45.0~team slate favourable~0
+Tre Tucker~WR~LV~75~-45.8~9~176~71~227~-5~~~1~-45.8~~0
+Isaac TeSlaa~WR~DET~73~-47.6~9~177~72~198~-5~~~1~-47.6~~0
+Darnell Washington~TE~PIT~57~-48.7~6~178~34~276~-1~~~1~-48.7~~0
+Eli Stowers~TE~PHI~55~-50.6~6~179~35~233~-1~~~1~-50.6~~1
+Malik Washington~WR~MIA~69~-51.8~9~180~73~243~-3~~~1~-51.8~~0
+Tyler Allgeier~RB~ARI~66~-53.4~9~181~50~172~-3~~~1~-53.4~~0
+Dawson Knox~TE~BUF~52~-53.6~6~182~36~363~0~~~1~-53.6~~0
+Zachariah Branch~WR~ATL~67~-53.8~9~183~74~212~-3~~~1~-53.8~~1
+Colby Parkinson~TE~LAR~52~-53.9~7~184~37~254~0~~~1~-53.9~~0
+Cole Kmet~TE~CHI~52~-54.4~7~185~38~372~-3~~~1~-54.4~~0
+Germie Bernard~WR~PIT~66~-54.5~9~186~75~256~-3~~~1~-54.5~~1
+Adonai Mitchell~WR~NYJ~66~-54.7~9~187~76~222~-3~~~1~-54.7~~0
+Ted Hurst~WR~TB~66~-55.1~9~188~77~261~-3~~~1~-55.1~~1
+Travis Hunter~WR~JAX~65~-55.5~9~189~78~150~-9~~~1~-55.5~~0
+Pat Bryant~WR~DEN~65~-56.0~9~190~79~230~-3~~~1~-56.0~~0
+Kayshon Boutte~WR~NE~64~-56.8~9~191~80~180~-5~~Requested trade; squeezed by AJ Brown - roster risk~1~-56.8~~0
+Tyreek Hill~WR~MIA~63~-57.6~9~192~81~193~-4~~~1~-57.6~~0
+Tank Bigsby~RB~PHI~61~-57.7~9~193~51~185~-1~~~1~-57.7~~0
+Tory Horton~WR~SEA~63~-58.3~9~194~82~277~-4~~~1~-58.3~~0
+Skyler Bell~WR~BUF~63~-58.4~9~195~83~247~-4~~~1~-58.4~~1
+Brian Robinson~RB~ATL~60~-58.6~9~196~52~134~-4~~~1~-58.6~~0
+Andrei Iosivas~WR~CIN~62~-58.9~9~197~84~293~-3~~~1~-58.9~~0
+Chris Bell~WR~MIA~62~-59.3~9~198~85~280~-3~~~1~-59.3~~1
+Devaughn Vele~WR~NO~62~-59.3~9~199~86~308~-3~~~1~-59.3~~0
+Jake Tonges~TE~SF~46~-59.7~7~200~39~266~0~~~1~-59.7~~0
+Evan Engram~TE~DEN~46~-59.9~7~201~40~258~0~~~1~-59.9~~0
+Ja'Kobi Lane~WR~BAL~61~-59.9~9~202~87~263~-3~~~1~-59.9~~1
+Elijah Sarratt~WR~BAL~60~-60.5~9~203~88~277~-3~~~1~-60.5~~1
+Emmett Johnson~RB~KC~58~-60.6~9~204~53~178~-1~~~1~-60.6~~1
+Ray Davis~RB~BUF~58~-60.6~9~205~54~202~-3~~~1~-60.6~~0
+Jonah Coleman~RB~DEN~58~-60.6~9~206~55~184~-2~~~1~-60.6~~1
+Chimere Dike~WR~TEN~60~-61.2~9~207~89~318~1~~~1~-61.2~~0
+Lamar Jackson~QB~BAL~265~-61.6~7~208~24~48~-22~15~36 sacks in 13 games hurts here~0~~~0
+Darius Slayton~WR~NYG~59~-61.7~9~209~90~272~-4~~~1~-61.7~~0
+Nicholas Singleton~RB~TEN~57~-62.2~9~210~56~217~-2~~~1~-62.2~~1
+Cooper Kupp~WR~SEA~58~-62.5~9~211~91~186~-2~~~1~-62.5~~0
+Jack Bech~WR~LV~58~-62.8~9~212~92~238~-5~~~1~-62.8~~0
+Rashod Bateman~WR~BAL~58~-63.4~9~213~93~190~-2~~~1~-63.4~~0
+Mike Washington Jr.~RB~LV~55~-63.8~9~214~57~208~-2~~~1~-63.8~~1
+Malachi Fields~WR~NYG~56~-64.9~9~215~94~231~-2~~~1~-64.9~~1
+Jaylin Noel~WR~HOU~55~-65.4~9~216~95~236~-2~~~1~-65.4~~0
+David Njoku~TE~LAC~39~-67.1~7~217~41~222~0~~~1~-67.1~~0
+Jordan James~RB~SF~52~-67.4~9~218~58~183~-1~~~1~-67.4~~0
+James Conner~RB~ARI~51~-68.0~9~219~59~185~2~~Trey Benson likely takes over mid-season barring injury~1~-68.0~~0
+Isaiah Davis~RB~NYJ~51~-68.1~9~220~60~285~-2~~~1~-68.1~~0
+Alvin Kamara~RB~NO~50~-68.8~9~221~61~146~-1~~~1~-68.8~~0
+Justice Hill~RB~BAL~50~-69.1~9~222~62~188~-6~~~1~-69.1~~0
+Calvin Ridley~WR~TEN~51~-69.5~9~223~96~245~-2~~~1~-69.5~~0
+Samaje Perine~RB~CIN~49~-70.2~9~224~63~273~-1~~~1~-70.2~~0
+Sean Tucker~RB~TB~49~-70.4~9~225~64~216~2~~~1~-70.4~~0
+Emanuel Wilson~RB~SEA~48~-70.8~9~226~65~228~-2~~~1~-70.8~~0
+Isiah Pacheco~RB~DET~48~-70.8~9~227~66~147~-1~~~1~-70.8~~0
+Antonio Williams~WR~WAS~50~-70.9~9~228~97~240~-2~~~1~-70.9~~1
+Jayden Daniels~QB~WAS~255~-72.0~8~229~25~64~-11~15~Only 7 games in 2025~1~-75.5~~0
+Cam Ward~QB~TEN~255~-72.1~7~230~26~139~-1~~~1~-72.1~~0
+Marvin Mims Jr.~WR~DEN~49~-72.2~9~231~98~322~2~~~1~-72.2~~0
+MarShawn Lloyd~RB~GB~47~-72.3~9~232~67~201~0~~~1~-72.3~~0
+Isaiah Bond~WR~CLE~48~-72.5~9~233~99~348~-3~~~1~-72.5~~0
+Chris Brooks~RB~GB~46~-73.0~9~234~68~298~-4~~~1~-73.0~~0
+Dontayvion Wicks~WR~PHI~47~-73.9~9~235~100~207~-3~~~1~-73.9~~0
+Kendrick Bourne~WR~ARI~47~-73.9~9~236~101~354~-2~~~1~-73.9~~0
+Tank Dell~WR~HOU~47~-74.0~9~237~102~283~-4~~~1~-74.0~~0
+Braelon Allen~RB~NYJ~45~-74.1~9~238~69~179~0~~~1~-74.1~~0
+LeQuint Allen~RB~JAX~43~-76.0~9~239~70~281~0~~~1~-76.0~~0
+Ty Johnson~RB~BUF~43~-76.0~9~240~71~282~-3~~~1~-76.0~~0
+Xavier Legette~WR~CAR~44~-76.5~9~241~103~303~-2~~~1~-76.5~~0
+Kaytron Allen~RB~WAS~42~-77.0~9~242~72~215~-1~~~1~-77.0~~1
+Jahan Dotson~WR~ATL~43~-77.6~9~243~104~291~-1~~~1~-77.6~~0
+Tyquan Thornton~WR~KC~43~-78.4~9~244~105~278~-3~~~1~-78.4~~0
+Jaydon Blue~RB~DAL~40~-79.2~9~245~73~197~-1~~~1~-79.2~~0
+Jaylen Wright~RB~MIA~40~-79.2~9~246~74~271~-1~~~1~-79.2~~0
+DeMario Douglas~WR~NE~41~-79.9~9~247~106~351~-1~~~1~-79.9~~0
+Mack Hollins~WR~NE~41~-80.2~9~248~107~350~-3~~~1~-80.2~~0
+Oscar Delp~TE~NO~25~-80.5~7~249~42~331~0~~~1~-80.5~~1
+Darnell Mooney~WR~NYG~40~-80.8~9~250~108~219~-2~~~1~-80.8~~0
+Charlie Kolar~TE~LAC~25~-80.9~8~251~43~315~0~~~1~-80.9~~0
+Kaelon Black~RB~SF~38~-81.1~9~252~75~184~-1~~~1~-81.1~~1
+Zavion Thomas~WR~CHI~39~-82.0~9~253~109~296~-2~~~1~-82.0~~1
+Noah Fant~TE~NO~24~-82.0~8~254~44~366~0~~~1~-82.0~~0
+Zach Ertz~TE~WAS~24~-82.2~8~255~45~356~0~~~1~-82.2~~0
+Jonnu Smith~TE~PIT~24~-82.2~8~256~46~362~0~~~1~-82.2~~0
+Eli Raridon~TE~NE~22~-84.3~8~257~47~313~0~~~1~-84.3~~1
+Tyler Higbee~TE~LAR~22~-84.4~8~258~48~293~0~~~1~-84.4~~0
+Fernando Mendoza~QB~LV~242~-84.6~7~259~27~129~1~~~1~-84.6~~1
+Brandon Aiyuk~WR~SF~35~-86.3~9~260~110~306~-1~~~1~-86.3~~0
+Seth McGowan~RB~IND~31~-87.8~9~261~76~333~-1~~~1~-87.8~~1
+Emari Demercado~RB~KC~30~-89.4~9~262~77~234~-1~~~1~-89.4~~0
+Malik Davis~RB~DAL~29~-89.6~9~263~78~317~-1~~~1~-89.6~~0
+Demond Claiborne~RB~MIN~29~-90.2~9~264~79~223~0~~~1~-90.2~~1
+Devin Neal~RB~NO~29~-90.2~9~265~80~301~1~~~1~-90.2~~0
+Kaleb Johnson~RB~PIT~28~-90.7~9~266~81~324~-3~~~1~-90.7~~0
+Christian Kirk~WR~SF~30~-90.8~9~267~111~229~-1~~Deebo arrival squeezes targets; Purdy spreads it~1~-90.8~~0
+Trevor Etienne~RB~CAR~27~-91.6~9~268~82~337~-2~~~1~-91.6~~0
+Trey Benson~RB~ARI~27~-92.0~9~269~83~332~1~~~1~-92.0~~0
+Calvin Austin III~WR~NYG~29~-92.1~9~270~112~352~-1~~~1~-92.1~~0
+DJ Giddens~RB~IND~26~-93.4~9~271~84~239~-2~~~1~-93.4~~0
+Konata Mumpfield~WR~LAR~27~-93.7~9~272~113~310~-1~~~1~-93.7~~0
+Nick Chubb~RB~HOU~24~-94.6~9~273~85~292~0~~~1~-94.6~~0
+Adam Randall~RB~BAL~24~-94.8~9~274~86~253~-3~~~1~-94.8~~1
+Keon Coleman~WR~BUF~26~-95.1~9~275~114~272~0~~~1~-95.1~~0
+Brenen Thompson~WR~LAC~26~-95.2~9~276~115~320~-2~~~1~-95.2~~1
+Jawhar Jordan~RB~HOU~23~-95.6~9~277~87~339~-1~~~1~-95.6~~0
+Cyrus Allen~WR~KC~25~-96.4~9~278~116~226~-1~~~1~-96.4~~1
+Najee Harris~RB~LAC~23~-96.4~9~279~88~290~-1~~~1~-96.4~~0
+George Holani~RB~SEA~22~-96.8~9~280~89~220~-1~~~1~-96.8~~0
+Tahj Brooks~RB~CIN~22~-96.8~9~281~90~257~-1~~~1~-96.8~~0
+Mitchell Evans~TE~CAR~9~-96.8~9~282~49~327~0~~~1~-96.8~~0
+Kareem Hunt~RB~KC~22~-97.0~9~283~91~358~-1~~~1~-97.0~~0
+Treylon Burks~WR~WAS~24~-97.1~9~284~117~314~-1~~~1~-97.1~~0
+Savion Williams~WR~GB~23~-97.8~9~285~118~344~0~~~1~-97.8~~0
+Ollie Gordon~RB~MIA~21~-98.0~9~286~92~237~-1~~~1~-98.0~~0
+Jalen Tolbert~WR~MIA~23~-98.2~9~287~119~288~-2~~~1~-98.2~~0
+Audric Estime~RB~NO~21~-98.5~9~288~93~373~-1~~~1~-98.5~~0
+Caleb Douglas~WR~MIA~22~-99.2~9~289~120~288~-1~~~1~-99.2~~1
+Kevin Coleman Jr.~WR~MIA~22~-99.3~9~290~121~346~-1~~~1~-99.3~~1
+Kyle Williams~WR~NE~21~-99.6~9~291~122~347~-1~~~1~-99.6~~0
+Taysom Hill~TE~NO~6~-99.7~9~292~50~369~0~~~1~-99.7~~0
+Kalif Raymond~WR~CHI~19~-101.5~9~293~123~349~-1~~~1~-101.5~~0
+Brashard Smith~RB~KC~17~-102.2~9~294~94~345~-1~~~1~-102.2~~0
+Erick All Jr.~TE~CIN~0~-106.0~9~295~51~323~0~~~1~-106.0~~0
+Geno Smith~QB~NYJ~216~-110.1~9~296~28~175~0~16~17 INT + 55 sacks~1~-120.1~QB slate top-5 TOUGHEST~0
+Devin Singletary~RB~NYG~9~-110.3~9~297~95~336~-1~~~1~-110.3~~0
+Jarquez Hunter~RB~LAR~8~-110.8~9~298~96~338~-1~~~1~-110.8~~0
+Aaron Rodgers~QB~PIT~214~-112.8~8~299~29~119~0~~~1~-112.8~~0
+Michael Carter~RB~TEN~6~-113.1~9~300~97~368~-1~~~1~-113.1~~0
+Devontez Walker~WR~BAL~8~-113.4~9~301~124~249~-1~~~1~-113.4~~0
+Kendre Miller~RB~NO~4~-114.9~9~302~98~329~0~~~1~-114.9~~0
+Luke McCaffrey~WR~WAS~6~-115.3~9~303~125~328~-1~~~1~-115.3~~0
+Raheim Sanders~RB~CLE~3~-115.5~9~304~99~341~0~~~1~-115.5~~0
+Phil Mafah~RB~DAL~3~-116.3~9~305~100~302~-3~~~1~-116.3~~0
+Sione Vaki~RB~DET~2~-116.5~9~306~101~340~-1~~~1~-116.5~~0
+Tua Tagovailoa~QB~MIA~209~-118.1~9~307~30~170~0~15~15 INT~1~-129.9~QB slate top-5 TOUGHEST; team slate punishing~0
+Ashton Dulin~WR~IND~2~-118.9~9~308~126~343~-1~~~1~-118.9~~0
+Chris Brazzell II~WR~CAR~0~-120.9~9~309~127~309~0~~~1~-120.9~~1
+Jacoby Brissett~QB~ARI~189~-138.4~8~310~31~241~-1~~~1~-138.4~~0
+Michael Penix Jr.~QB~ATL~121~-206.1~8~311~32~269~0~~~1~-206.1~~0
+Deshaun Watson~QB~CLE~115~-211.7~9~312~33~304~0~~~1~-211.7~~0
+Shedeur Sanders~QB~CLE~109~-218.3~9~313~34~280~0~~~1~-218.3~~0
+Carson Beck~QB~ARI~60~-267.0~9~314~35~330~0~~~1~-267.0~~1
+Kirk Cousins~QB~LV~50~-277.0~9~315~36~260~0~~~1~-277.0~~0
+Justin Fields~QB~KC~37~-290.1~9~316~37~359~0~~~1~-290.1~~0
+Carson Wentz~QB~MIN~15~-312.1~9~317~38~364~0~~~1~-312.1~~0
 `;
 const TEAMS={"Uncle Better Toe Joe":{"place":12,"slot":1,"keep":["Nico Collins","Omarion Hampton"],"roster":[["QB","Caleb Williams"],["WR","Nico Collins"],["WR","Jordan Addison"],["RB","Kyle Monangai"],["RB","RJ Harvey"],["TE","Kyle Pitts Sr."],["W/T","Jameson Williams"],["W/R","Omarion Hampton"],["BN","Jacory Croskey-Merritt"],["BN","Rome Odunze"],["BN","Malik Washington"],["BN","Baker Mayfield"],["BN","Blake Corum"],["IR","Alvin Kamara"]]},
 "Saquon It Ain't So":{"place":11,"slot":2,"keep":["Saquon Barkley","DeVonta Smith"],"roster":[["QB","Justin Herbert"],["WR","Michael Pittman Jr."],["WR","Wan'Dale Robinson"],["RB","Aaron Jones Sr."],["RB","Saquon Barkley"],["TE","Harold Fannin Jr."],["W/T","DeVonta Smith"],["W/R","Bucky Irving"],["BN","Colston Loveland"],["BN","Luther Burden III"],["BN","Marvin Harrison Jr."],["BN","Joe Flacco"],["BN","Tank Bigsby"],["IR","Travis Hunter"]]},
@@ -612,7 +747,8 @@ const TEAMS={"Uncle Better Toe Joe":{"place":12,"slot":1,"keep":["Nico Collins",
 "The Bees Knees":{"place":3,"slot":10,"keep":["De'Von Achane","Trey McBride","Rashee Rice","Chris Olave"],"roster":[["QB","Dak Prescott"],["WR","Tetairoa McMillan"],["WR","Chris Olave"],["RB","De'Von Achane"],["RB","D'Andre Swift"],["TE","Trey McBride"],["W/T","Mike Evans"],["W/R","DJ Moore"],["BN","Audric Estime"],["BN","Woody Marks"],["BN","Emanuel Wilson"],["BN","Sean Tucker"],["IR","Joe Mixon"],["IR","Rashee Rice"]]},
 "Expected Sacko":{"place":2,"slot":11,"keep":["Jahmyr Gibbs","Jaxon Smith-Njigba","James Cook","Chase Brown"],"roster":[["QB","Bo Nix"],["WR","Jaxon Smith-Njigba"],["WR","Courtland Sutton"],["RB","James Cook III"],["RB","Jahmyr Gibbs"],["TE","Hunter Henry"],["W/T","Jauan Jennings"],["W/R","Chase Brown"],["BN","Jacoby Brissett"],["BN","Alec Pierce"],["BN","Jerry Jeudy"],["BN","Josh Downs"],["BN","Dylan Sampson"],["BN","Dallas Goedert"]]},
 "Sugma":{"place":1,"slot":12,"keep":["Ja'Marr Chase","Bijan Robinson","Cam Skattebo","Malik Nabers"],"roster":[["QB","Trevor Lawrence"],["WR","Ja'Marr Chase"],["WR","Parker Washington"],["RB","Bijan Robinson"],["RB","Jaylen Warren"],["TE","Taysom Hill"],["W/T","Jakobi Meyers"],["W/R","Javonte Williams"],["BN","Elic Ayomanor"],["BN","Christian Kirk"],["BN","Patrick Mahomes"],["BN","Andrei Iosivas"],["BN","Chuba Hubbard"],["BN","Nick Chubb"],["IR","Cam Skattebo"],["IR","Malik Nabers"]]}};
-const DEFS=[["DEN",229,229,-6,6,"68 sacks led the NFL and 29 TDs allowed was the fewest. Some regression is priced in."],["LAR",212,178,34,0,"Added Myles Garrett (23 sacks, NFL record, 2x DPOY) plus corners Trent McDuffie and Jaylen Watson. Lost Jared Verse. An Aaron Donald return is not counted here."],["LAC",198,198,0,0,"49 sacks and 19 interceptions, but recovered only 3 fumbles."],["HOU",197,204,-7,0,"4 defensive touchdowns will not repeat. 295 points allowed was 2nd fewest."],["SEA",194,200,-6,0,"Fewest points allowed in the NFL at 292. Best yards per carry allowed at 3.7."],["ATL",187,187,0,0,"57 sacks, 2nd most in the NFL."],["JAX",180,180,0,0,"22 interceptions, 2nd most. Fewest rushing yards allowed at 1,449."],["PIT",168,169,-7,6,"4 defensive touchdowns and 12 fumble recoveries. Easy schedule."],["MIN",164,170,0,-6,"2nd fewest touchdowns allowed. Toughest defensive schedule."],["CLE",161,185,-30,6,"Lost Myles Garrett, which was the pass rush."],["CHI",157,166,-9,0,"23 interceptions led the NFL and will not repeat."],["DET",154,154,0,0,"49 sacks, 4th in the NFL."],["PHI",153,159,0,-6,"Fewest passing touchdowns allowed at 14. Tough schedule."],["NO",152,152,0,0,"45 sacks, 9th."],["NE",150,150,0,0,"330 points allowed, 5th."],["KC",139,141,-8,6,"Lost Trent McDuffie to the Rams."],["GB",136,136,0,0,""],["BUF",132,132,0,0,"Fewest passing yards allowed, but 22 rushing TDs allowed."]];
+var DEFNAME={"DEN": "Denver Broncos", "LAR": "Los Angeles Rams", "LAC": "Los Angeles Chargers", "HOU": "Houston Texans", "SEA": "Seattle Seahawks", "ATL": "Atlanta Falcons", "JAX": "Jacksonville Jaguars", "PIT": "Pittsburgh Steelers", "MIN": "Minnesota Vikings", "CLE": "Cleveland Browns", "CHI": "Chicago Bears", "DET": "Detroit Lions", "PHI": "Philadelphia Eagles", "NO": "New Orleans Saints", "NE": "New England Patriots", "KC": "Kansas City Chiefs", "GB": "Green Bay Packers", "BUF": "Buffalo Bills", "ARI": "Arizona Cardinals", "BAL": "Baltimore Ravens", "CAR": "Carolina Panthers", "CIN": "Cincinnati Bengals", "DAL": "Dallas Cowboys", "IND": "Indianapolis Colts", "LV": "Las Vegas Raiders", "MIA": "Miami Dolphins", "NYG": "New York Giants", "NYJ": "New York Jets", "SF": "San Francisco 49ers", "TB": "Tampa Bay Buccaneers", "TEN": "Tennessee Titans", "WAS": "Washington Commanders"};
+const DEFS=[["DEN", 229, 229, -6, 6, "68 sacks led the NFL and 29 TDs allowed was the fewest. Some regression is priced in."], ["LAR", 212, 178, 34, 0, "Added Myles Garrett (23 sacks, NFL record, 2x DPOY) plus corners Trent McDuffie and Jaylen Watson. Lost Jared Verse. An Aaron Donald return is not counted here."], ["LAC", 198, 198, 0, 0, "49 sacks and 19 interceptions, but recovered only 3 fumbles."], ["HOU", 197, 204, -7, 0, "4 defensive touchdowns will not repeat. 295 points allowed was 2nd fewest."], ["SEA", 194, 200, -6, 0, "Fewest points allowed in the NFL at 292. Best yards per carry allowed at 3.7."], ["ATL", 187, 187, 0, 0, "57 sacks, 2nd most in the NFL."], ["JAX", 180, 180, 0, 0, "22 interceptions, 2nd most. Fewest rushing yards allowed at 1,449."], ["BAL", 178, 178, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["PIT", 168, 169, -7, 6, "4 defensive touchdowns and 12 fumble recoveries. Easy schedule."], ["MIN", 164, 170, 0, -6, "2nd fewest touchdowns allowed. Toughest defensive schedule."], ["DAL", 163, 163, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["NYG", 163, 163, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["CLE", 161, 185, -30, 6, "Lost Myles Garrett, which was the pass rush."], ["IND", 160, 160, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["SF", 160, 160, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["CHI", 157, 166, -9, 0, "23 interceptions led the NFL and will not repeat."], ["CAR", 155, 155, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["TB", 155, 155, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["DET", 154, 154, 0, 0, "49 sacks, 4th in the NFL."], ["PHI", 153, 159, 0, -6, "Fewest passing touchdowns allowed at 14. Tough schedule."], ["NO", 152, 152, 0, 0, "45 sacks, 9th."], ["CIN", 152, 152, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["NE", 150, 150, 0, 0, "330 points allowed, 5th."], ["WAS", 145, 145, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["KC", 139, 141, -8, 6, "Lost Trent McDuffie to the Rams."], ["GB", 136, 136, 0, 0, ""], ["BUF", 132, 132, 0, 0, "Fewest passing yards allowed, but 22 rushing TDs allowed."], ["TEN", 132, 132, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["ARI", 130, 130, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["LV", 128, 128, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["NYJ", 127, 127, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."], ["MIA", 123, 123, 0, 0, "Projection-based placement (Sleeper DEF projections mapped onto our scale). Less precise than the hand-scouted units."]];
 const PICKS=[[31,"R6"],[43,"R7"],[55,"R8"],[67,"R9"],[79,"R10"],[91,"R11"],[115,"R13"],[127,"R14"],[139,"R15"],[151,"R16"],[157,"R17 via We Be Illin'"],[161,"R17 via Cecil"],[163,"R17"]];
 const MYKEEPERS=["Christian McCaffrey","Amon-Ra St. Brown","Brock Bowers","Kenneth Walker III"];
 </script>
@@ -621,7 +757,8 @@ const MYKEEPERS=["Christian McCaffrey","Amon-Ra St. Brown","Brock Bowers","Kenne
 var $=function(s,r){return (r||document).querySelector(s)};
 var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
 var esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')};
-var PLAYERS=ROWS.trim().split('\n').map(function(line){var c=line.split('~');return{n:c[0],p:c[1],t:c[2],pts:+c[3],v:+c[4],tier:+c[5],rk:+c[6],prk:+c[7],adp:c[8]===''?null:+c[8],fmt:+c[9],g:c[10],note:c[11]||'',avail:c[12]==='1',kv:c[13]===''?null:+c[13],sos:c[14]||''}});
+var ROOKUP={"Jeremiyah Love": {"rd": 1, "pk": 3, "dep": 1, "blk": "\u2014", "ba": null, "inh": 1.0, "v": 54.5, "cv": 116.8, "pp": 0.95, "sw": 59.2, "cu": 113.7}, "Jadarian Price": {"rd": 1, "pk": 32, "dep": 1, "blk": "\u2014", "ba": null, "inh": 1.0, "v": 23.5, "cv": 75.0, "pp": 0.95, "sw": 48.9, "cu": 72.4}, "Carnell Tate": {"rd": 1, "pk": 4, "dep": 1, "blk": "\u2014", "ba": null, "inh": 1.0, "v": -3.0, "cv": 38.3, "pp": 0.95, "sw": 39.2, "cu": 36.2}, "Jordyn Tyson": {"rd": 1, "pk": 8, "dep": 2, "blk": "Chris Olave", "ba": 26, "inh": 1.0, "v": -5.0, "cv": 33.4, "pp": 0.75, "sw": 28.8, "cu": 23.8}, "Makai Lemon": {"rd": 1, "pk": 20, "dep": 2, "blk": "DeVonta Smith", "ba": 27, "inh": 1.0, "v": -30.0, "cv": 33.0, "pp": 0.825, "sw": 52.0, "cu": 22.0}, "Emmett Johnson": {"rd": 5, "pk": 161, "dep": 2, "blk": "Kenneth Walker", "ba": 25, "inh": 0.58, "v": -65.1, "cv": 3.3, "pp": 0.315, "sw": 21.5, "cu": -43.6}, "Kaelon Black": {"rd": 3, "pk": 90, "dep": 3, "blk": "Christian McCaffrey", "ba": 30, "inh": 0.8, "v": -85.6, "cv": 68.5, "pp": 0.472, "sw": 72.8, "cu": -12.8}, "Mike Washington Jr.": {"rd": 4, "pk": 122, "dep": 2, "blk": "Ashton Jeanty", "ba": 22, "inh": 0.68, "v": -68.2, "cv": 30.1, "pp": 0.413, "sw": 40.5, "cu": -27.7}, "Zachariah Branch": {"rd": 3, "pk": 79, "dep": 2, "blk": "Drake London", "ba": 25, "inh": 0.8, "v": -53.9, "cv": 11.0, "pp": 0.525, "sw": 34.1, "cu": -19.8}, "Kaytron Allen": {"rd": 6, "pk": 187, "dep": 3, "blk": "Jacory Croskey-Merritt", "ba": 25, "inh": 0.48, "v": -81.5, "cv": -67.8, "pp": 0.16, "sw": 2.2, "cu": -79.3}, "Nicholas Singleton": {"rd": 5, "pk": 165, "dep": 3, "blk": "Tony Pollard", "ba": 29, "inh": 0.58, "v": -66.6, "cv": -41.2, "pp": 0.241, "sw": 6.1, "cu": -60.5}, "Demond Claiborne": {"rd": 6, "pk": 198, "dep": 3, "blk": "Jordan Mason", "ba": 27, "inh": 0.48, "v": -94.7, "cv": -55.8, "pp": 0.16, "sw": 6.2, "cu": -88.5}, "Cyrus Allen": {"rd": 5, "pk": 176, "dep": 5, "blk": "Rashee Rice", "ba": 26, "inh": 0.58, "v": -96.5, "cv": -32.0, "pp": 0.076, "sw": 4.9, "cu": -91.6}, "Malachi Fields": {"rd": 3, "pk": 74, "dep": 3, "blk": "Malik Nabers", "ba": 23, "inh": 0.8, "v": -65.0, "cv": -1.5, "pp": 0.385, "sw": 24.4, "cu": -40.6}, "Eli Stowers": {"rd": 2, "pk": 54, "dep": 2, "blk": "Dallas Goedert", "ba": 31, "inh": 0.9, "v": -50.6, "cv": -25.0, "pp": 0.797, "sw": 20.4, "cu": -30.2}, "Skyler Bell": {"rd": 4, "pk": 125, "dep": 3, "blk": "DJ Moore", "ba": 29, "inh": 0.68, "v": -58.5, "cv": -38.4, "pp": 0.316, "sw": 6.4, "cu": -52.1}, "Germie Bernard": {"rd": 2, "pk": 47, "dep": 3, "blk": "DK Metcalf", "ba": 28, "inh": 0.9, "v": -54.6, "cv": -9.0, "pp": 0.531, "sw": 24.2, "cu": -30.4}, "Ted Hurst": {"rd": 3, "pk": 84, "dep": 4, "blk": "Emeka Egbuka", "ba": 23, "inh": 0.8, "v": -55.2, "cv": 0.2, "pp": 0.231, "sw": 12.8, "cu": -42.4}, "Ja'Kobi Lane": {"rd": 3, "pk": 80, "dep": 2, "blk": "Zay Flowers", "ba": 25, "inh": 0.8, "v": -60.0, "cv": 1.6, "pp": 0.525, "sw": 32.3, "cu": -27.7}, "Chris Bell": {"rd": 3, "pk": 94, "dep": 2, "blk": "Malik Washington", "ba": 25, "inh": 0.8, "v": -59.4, "cv": -47.1, "pp": 0.604, "sw": 7.4, "cu": -52.0}, "Zavion Thomas": {"rd": 3, "pk": 89, "dep": 3, "blk": "Luther Burden", "ba": 22, "inh": 0.8, "v": -82.1, "cv": -6.1, "pp": 0.385, "sw": 29.3, "cu": -52.8}, "Fernando Mendoza": {"rd": 1, "pk": 1, "dep": 1, "blk": "\u2014", "ba": null, "inh": 1.0, "v": -84.6, "cv": 0.2, "pp": 0.95, "sw": 80.6, "cu": -4.0}, "Kenyon Sadiq": {"rd": 1, "pk": 16, "dep": 1, "blk": "\u2014", "ba": null, "inh": 1.0, "v": -39.5, "cv": -16.2, "pp": 0.95, "sw": 22.1, "cu": -17.4}, "Omar Cooper Jr.": {"rd": 1, "pk": 30, "dep": 2, "blk": "Garrett Wilson", "ba": 26, "inh": 1.0, "v": -35.1, "cv": 28.0, "pp": 0.75, "sw": 47.3, "cu": 12.2}, "Denzel Boston": {"rd": 2, "pk": 39, "dep": 2, "blk": "KC Concepcion", "ba": 21, "inh": 0.9, "v": -39.8, "cv": -23.6, "pp": 0.733, "sw": 11.9, "cu": -27.9}, "Jonah Coleman": {"rd": 4, "pk": 108, "dep": 3, "blk": "J.K. Dobbins", "ba": 27, "inh": 0.68, "v": -65.0, "cv": -27.6, "pp": 0.303, "sw": 11.3, "cu": -53.7}, "KC Concepcion": {"rd": 1, "pk": 24, "dep": 1, "blk": "\u2014", "ba": null, "inh": 1.0, "v": -15.0, "cv": 22.1, "pp": 0.95, "sw": 35.2, "cu": 20.2}, "De'Zhaun Stribling": {"rd": 2, "pk": 33, "dep": 3, "blk": "Mike Evans", "ba": 32, "inh": 0.9, "v": -34.9, "cv": 15.3, "pp": 0.574, "sw": 28.8, "cu": -6.1}, "Antonio Williams": {"rd": 3, "pk": 71, "dep": 3, "blk": "Terry McLaurin", "ba": 30, "inh": 0.8, "v": -71.0, "cv": -6.8, "pp": 0.438, "sw": 28.1, "cu": -42.9}, "Adam Randall": {"rd": 5, "pk": 174, "dep": 4, "blk": "Derrick Henry", "ba": 32, "inh": 0.58, "v": -99.3, "cv": 13.4, "pp": 0.158, "sw": 17.8, "cu": -81.5}, "Elijah Sarratt": {"rd": 4, "pk": 115, "dep": 3, "blk": "Zay Flowers", "ba": 25, "inh": 0.68, "v": -60.6, "cv": -16.8, "pp": 0.275, "sw": 12.0, "cu": -48.6}, "Caleb Douglas": {"rd": 3, "pk": 75, "dep": 6, "blk": "Malik Washington", "ba": 25, "inh": 0.8, "v": -99.3, "cv": -65.7, "pp": 0.126, "sw": 4.2, "cu": -95.1}, "Chris Brazzell II": {"rd": 3, "pk": 83, "dep": 6, "blk": "Tetairoa McMillan", "ba": 23, "inh": 0.8, "v": -121.0, "cv": -3.4, "pp": 0.126, "sw": 14.8, "cu": -106.2}, "Eli Raridon": {"rd": 3, "pk": 95, "dep": 2, "blk": "Hunter Henry", "ba": 31, "inh": 0.8, "v": -84.3, "cv": -23.7, "pp": 0.656, "sw": 39.8, "cu": -44.5}, "Brenen Thompson": {"rd": 4, "pk": 105, "dep": 4, "blk": "Ladd McConkey", "ba": 24, "inh": 0.68, "v": -95.3, "cv": -16.7, "pp": 0.165, "sw": 13.0, "cu": -82.3}, "Carson Beck": {"rd": 3, "pk": 65, "dep": 2, "blk": "Jacoby Brissett", "ba": 33, "inh": 0.8, "v": -267.0, "cv": -176.2, "pp": 0.656, "sw": 59.6, "cu": -207.4}, "Oscar Delp": {"rd": 3, "pk": 73, "dep": 2, "blk": "Juwan Johnson", "ba": 29, "inh": 0.8, "v": -80.5, "cv": -33.8, "pp": 0.604, "sw": 28.2, "cu": -52.3}, "Seth McGowan": {"rd": 7, "pk": 237, "dep": 2, "blk": "Jonathan Taylor", "ba": 27, "inh": 0.4, "v": -92.3, "cv": -24.6, "pp": 0.188, "sw": 12.7, "cu": -79.6}, "Kevin Coleman Jr.": {"rd": 5, "pk": 177, "dep": 7, "blk": "Malik Washington", "ba": 25, "inh": 0.58, "v": -99.4, "cv": -80.9, "pp": 0.076, "sw": 1.4, "cu": -98.0}};
+var PLAYERS=ROWS.trim().split('\n').map(function(line){var c=line.split('~');return{n:c[0],p:c[1],t:c[2],pts:+c[3],v:+c[4],tier:+c[5],rk:+c[6],prk:+c[7],adp:c[8]===''?null:+c[8],fmt:+c[9],g:c[10],note:c[11]||'',avail:c[12]==='1',kv:c[13]===''?null:+c[13],sos:c[14]||'',rook:c[15]==='1'}});
 var idx={};PLAYERS.forEach(function(p){idx[p.n]=p});
 function alias(n){var a={'Kyle Pitts Sr.':'Kyle Pitts','Harold Fannin Jr.':'Harold Fannin','Luther Burden III':'Luther Burden','James Cook III':'James Cook','Travis Etienne Jr.':'Travis Etienne','Deebo Samuel Sr.':'Deebo Samuel','Chris Godwin Jr.':'Chris Godwin','DJ Moore':'D.J. Moore','Oronde Gadsden':'Oronde Gadsden II'};return a[n]||n}
 
@@ -661,6 +798,7 @@ function resetDraft(){ DRAFT={};ORDER=[];MYDEF=null; saveDraft(); refreshAll(); 
    re-tag). Safe + idempotent: never un-tags, never duplicates. */
 function syncNorm(s){return (s||'').toLowerCase().replace(/[.'\u2019]/g,'').replace(/\b(jr|sr|ii|iii|iv)\b/g,'').replace(/[^a-z]/g,'');}
 var _syncIndex=null;
+var SYNC_ALIAS={'kennygainwell':'Kenneth Gainwell','kennethgainwell':'Kenneth Gainwell'};
 function syncIndex(){
   if(_syncIndex)return _syncIndex;
   _syncIndex={};
@@ -669,6 +807,7 @@ function syncIndex(){
 }
 function matchYahooName(name,pos,team){
   var idx=syncIndex(); var key=syncNorm(name);
+  if(SYNC_ALIAS[key]&&idx[syncNorm(SYNC_ALIAS[key])])return SYNC_ALIAS[key];
   if(idx[key])return idx[key];
   // last-name + team fallback for tricky spellings
   var ln=syncNorm((name||'').split(' ').slice(1).join(' '));
@@ -705,7 +844,11 @@ function applyYahooPicks(list){
   if(!Array.isArray(list))return;
   var tagged=0, missed=[];
   list.forEach(function(pk){
-    if((pk.pos||'').toUpperCase()==='DEF') return;   // defenses handled via MYDEF, skip
+    if((pk.pos||'').toUpperCase()==='DEF'){          // opponent defense taken -> clear it off our board
+      var dt=matchDefTeam(pk.name||pk.team);
+      if(dt&&!DEFGONE[dt]){DEFGONE[dt]=1;tagged++}
+      return;
+    }
     var appName=pk.name?matchYahooName(pk.name,pk.pos,pk.team):null;
     if(!appName&&pk.board){ appName=matchFromBoard(pk.board); }
     if(appName){
@@ -722,6 +865,16 @@ function applyYahooPicks(list){
 window.addEventListener('hotsause:sync',function(e){
   try{ applyYahooPicks((e.detail&&e.detail.picks)||[]); }catch(err){ console.log('[HotSause] sync error',err); }
 });
+var DEFGONE={};
+function matchDefTeam(s){
+  if(!s)return null; var q=(''+s).toUpperCase();
+  for(var i=0;i<DEFS.length;i++){var t=DEFS[i][0];
+    if(q.indexOf(t)>-1)return t;}
+  var FULLD=DEFNAME;
+  for(var k in FULLD){if(q.indexOf(FULLD[k].toUpperCase())>-1)return k;
+    var last=FULLD[k].split(' ').pop().toUpperCase(); if(last.length>3&&q.indexOf(last)>-1)return k;}
+  return null;
+}
 function isGone(name){return !!DRAFT[name]}          // off every board
 function isMine(name){return DRAFT[name]==='mine'}
 // live available list = static-available AND not yet drafted
@@ -747,7 +900,7 @@ var DEFPTS=DEFS.map(function(d){return d[1]});
 var DMAX=Math.max.apply(null,DEFPTS),DMIN=Math.min.apply(null,DEFPTS);
 function defKv(pts){if(DMAX===DMIN)return 3;return Math.round((( (pts-DMIN)/(DMAX-DMIN) )*30 - 12)*10)/10;}
 var DEFPOOL=DEFS.map(function(d,i){
-  var full={DEN:'Denver Broncos',LAR:'Los Angeles Rams',LAC:'Los Angeles Chargers',HOU:'Houston Texans',SEA:'Seattle Seahawks',ATL:'Atlanta Falcons',JAX:'Jacksonville Jaguars',PIT:'Pittsburgh Steelers',MIN:'Minnesota Vikings',CLE:'Cleveland Browns',CHI:'Chicago Bears',DET:'Detroit Lions',PHI:'Philadelphia Eagles',NO:'New Orleans Saints',NE:'New England Patriots',KC:'Kansas City Chiefs',GB:'Green Bay Packers',BUF:'Buffalo Bills'}[d[0]]||d[0];
+  var full=DEFNAME[d[0]]||d[0];
   return {n:full+' D/ST',p:'DEF',t:d[0],pts:d[1],v:defKv(d[1]),kv:defKv(d[1]),adp:null,prk:i+1,tier:0,rk:0,fmt:0,g:'',note:'',sos:d[5]||'',isDef:true,defTeam:d[0]};
 });
 var avail=PLAYERS.filter(function(p){return p.avail&&p.kv!=null}).concat(DEFPOOL).sort(function(a,b){return b.kv-a.kv});
@@ -759,13 +912,13 @@ function poolSort(a,b){var av,bv;
   if(av===bv)return b.kv-a.kv;
   return sortDir==='asc'?av-bv:bv-av;}
 function syncPoolCarets(){$$('#pool th.sortable').forEach(function(th){var on=th.dataset.sort===sortKey;th.classList.toggle('active',on);th.classList.toggle('asc',on&&sortDir==='asc');th.classList.toggle('desc',on&&sortDir==='desc')})}
-function poolGone(p){return p.isDef?(MYDEF!=null&&MYDEF!==p.defTeam):isGone(p.n)}
+function poolGone(p){return p.isDef?((MYDEF!=null&&MYDEF!==p.defTeam)||!!DEFGONE[p.defTeam]):isGone(p.n)}
 function poolActBtns(p){
   if(p.isDef){return MYDEF===p.defTeam?'<button class="btn-mine" data-undef="1">\u2713 My DEF</button>':'<button class="btn-mine" data-defpick="'+p.defTeam+'">My DEF</button>';}
   return actBtns(p.n);
 }
 function renderPool(){var rows=avail.filter(function(p){if(poolGone(p))return false;if(apos!=='ALL'&&p.p!==apos)return false;if(aterm&&p.n.toLowerCase().indexOf(aterm)===-1)return false;return true}).sort(poolSort).slice(0,90);
-$('#poolBody').innerHTML=rows.map(function(p){var w=Math.max(2,(p.kv/maxKV)*100);var flag=p.sos.indexOf('EASIEST')>-1?'up':(p.sos.indexOf('TOUGHEST')>-1?'down':'');var mineDef=p.isDef&&MYDEF===p.defTeam;return '<tr'+(mineDef?' style="background:rgba(14,58,24,.5)"':'')+'><td class="rk">'+p.ark+'</td><td class="name">'+esc(p.n)+(mineDef?' <span class="kbadge" style="background:#1C6E33;color:#5BE08A">MINE</span>':'')+'</td><td class="pos c">'+p.p+(p.isDef?'':p.prk)+'</td><td class="pos c">'+p.t+'</td><td class="vcell"><span class="bar"><i style="width:'+w+'%"></i><b>'+p.kv.toFixed(0)+'</b></span></td><td class="num">'+(p.adp==null?'\u2014':p.adp)+'</td><td class="sos '+flag+'">'+esc(p.sos||'\u2014')+'</td><td class="act">'+poolActBtns(p)+'</td></tr>'}).join('')||'<tr><td colspan="8" style="padding:26px;color:#8A8A93">No players match.</td></tr>'}
+$('#poolBody').innerHTML=rows.map(function(p){var w=Math.max(2,(p.kv/maxKV)*100);var flag=p.sos.indexOf('EASIEST')>-1?'up':(p.sos.indexOf('TOUGHEST')>-1?'down':'');var mineDef=p.isDef&&MYDEF===p.defTeam;return '<tr'+(mineDef?' style="background:rgba(14,58,24,.5)"':'')+'><td class="rk">'+p.ark+'</td><td class="name">'+esc(p.n)+(mineDef?' <span class="kbadge" style="background:#1C6E33;color:#5BE08A">MINE</span>':'')+(p.rook?' <span class="rookpin">R</span>':'')+'</td><td class="pos c">'+p.p+(p.isDef?'':p.prk)+'</td><td class="pos c">'+p.t+'</td><td class="vcell"><span class="bar"><i style="width:'+w+'%"></i><b>'+p.kv.toFixed(0)+'</b></span></td><td class="num">'+(p.adp==null?'\u2014':p.adp)+'</td><td class="sos '+flag+'">'+esc(p.sos||'\u2014')+'</td><td class="act">'+poolActBtns(p)+'</td></tr>'}).join('')||'<tr><td colspan="8" style="padding:26px;color:#8A8A93">No players match.</td></tr>'}
 $$('[data-apos]').forEach(function(c){c.addEventListener('click',function(){$$('[data-apos]').forEach(function(x){x.classList.remove('on')});c.classList.add('on');apos=c.dataset.apos;renderPool()})});
 $('#aq').addEventListener('input',function(e){aterm=e.target.value.toLowerCase().trim();renderPool()});
 $$('#pool th.sortable').forEach(function(th){th.addEventListener('click',function(){var k=th.dataset.sort;if(sortKey===k){sortDir=sortDir==='asc'?'desc':'asc';}else{sortKey=k;sortDir=(k==='adp')?'asc':'desc';}syncPoolCarets();renderPool()})});
@@ -773,13 +926,21 @@ syncPoolCarets();
 renderPool();
 /* ===== ROUND BOARD ===== */
 var TEAMS=12,KEEP=38;
+/* picks earlier a rookie goes vs national ADP, by NFL draft round */
+var ROOKIE_PREM={1:28,2:20,3:14,4:10,5:8,6:6,7:5};
 var keptADP=PLAYERS.filter(function(p){return !p.avail&&p.adp!=null}).map(function(p){return p.adp}).sort(function(a,b){return a-b});
 function roundOfLive(l){return Math.ceil((l+KEEP)/TEAMS)}
 avail.forEach(function(p){
   if(p.isDef){return}
   if(p.adp==null){p.lp=null;return}
   var ahead=0;for(var i=0;i<keptADP.length;i++){if(keptADP[i]<p.adp)ahead++}
-  p.lp=Math.max(1,Math.round(p.adp-ahead));
+  /* ROOKIE MARKET PREMIUM — this league overdrafts rookies for keeper equity.
+     Applied to BOARD POSITION ONLY. Value (kv) is deliberately untouched: we want
+     to know a rookie goes early WITHOUT the model telling us he is worth more. */
+  var prem=0;
+  if(p.rook&&ROOKUP[p.n]){prem=ROOKIE_PREM[ROOKUP[p.n].rd]||5}
+  p.eadp=Math.max(1,p.adp-prem);
+  p.lp=Math.max(1,Math.round(p.eadp-ahead));
   p.rd=roundOfLive(p.lp);
   p.mr=Math.ceil(p.adp/TEAMS);
 });
@@ -860,7 +1021,7 @@ function playerRow(p,nxt,fit){
   var actCell=p.isDef?(MYDEF===p.defTeam?'<button class="btn-mine" data-undef="1">\u2713 My DEF</button>':'<button class="btn-mine" data-defpick="'+p.defTeam+'">My DEF</button>'):actBtns(p.n);
   return '<li class="prow '+st+(isFit?' s-fit':'')+'">'+
     '<span class="pk">'+p.lp+'</span>'+
-    '<span class="pnm">'+esc(p.n)+tag+(p.note?'<i>'+esc(p.note)+'</i>':'')+'</span>'+
+    '<span class="pnm">'+esc(p.n)+(p.rook?' <span class="rookpin">R</span>':'')+tag+(p.note?'<i>'+esc(p.note)+'</i>':'')+'</span>'+
     '<span class="ppos">'+posCell+'</span>'+
     '<span class="ptm">'+p.t+'</span>'+
     '<span class="pval">'+p.kv.toFixed(0)+'</span>'+
@@ -870,6 +1031,42 @@ function playerRow(p,nxt,fit){
 }
 $$('[data-rpos]').forEach(function(c){c.addEventListener('click',function(){$$('[data-rpos]').forEach(function(x){x.classList.remove('on')});c.classList.add('on');rbPos=c.dataset.rpos;renderRounds()})});
 renderRounds();
+
+/* ===== ROOKIE BOARD ===== */
+var rkPos='ALL',rkSort='sw';
+function renderRookies(){
+  var list=PLAYERS.filter(function(p){return p.rook&&ROOKUP[p.n]&&!isGone(p.n)});
+  /* QB VORP runs on a different scale (baseline 327) and cannot be ranked against
+     skill positions. 'All' therefore means all SKILL positions; QBs are their own view. */
+  if(rkPos==='ALL')list=list.filter(function(p){return p.p!=='QB'});
+  else list=list.filter(function(p){return p.p===rkPos});
+  list.sort(function(a,b){var A=ROOKUP[a.n],B=ROOKUP[b.n];
+    if(rkSort==='pk')return A.pk-B.pk;
+    return (B[rkSort]||0)-(A[rkSort]||0);});
+  var mx=1;list.forEach(function(p){mx=Math.max(mx,ROOKUP[p.n].sw)});
+  $('#rookBody').innerHTML=list.map(function(p){var u=ROOKUP[p.n];
+    var w=Math.max(2,(u.sw/mx)*100);
+    return '<tr><td class="name">'+esc(p.n)+' <span class="rookpin">R</span></td>'+
+      '<td>'+p.p+'</td><td>'+p.t+'</td>'+
+      '<td class="num">R'+u.rd+' #'+u.pk+'</td>'+
+      '<td class="num">'+(u.dep===1?'starter':u.dep)+'</td>'+
+      '<td>'+esc(u.blk)+(u.ba?' <span style="color:#8A8A93">('+u.ba+')</span>':'')+'</td>'+
+      '<td class="num">'+u.v.toFixed(1)+'</td>'+
+      '<td class="num">'+u.cv.toFixed(1)+'</td>'+
+      '<td class="num">'+(u.pp*100).toFixed(0)+'%</td>'+
+      '<td><span class="swingbar"><i style="width:'+w+'%"></i><b>'+u.sw.toFixed(1)+'</b></span></td>'+
+      '<td class="num">'+u.cu.toFixed(1)+'</td>'+
+      '<td class="act">'+actBtns(p.n)+'</td></tr>';
+  }).join('')||'<tr><td colspan="12" style="padding:26px;color:#8A8A93">No rookies match.</td></tr>';
+}
+$$('[data-rkpos]').forEach(function(c){c.addEventListener('click',function(){
+  $$('[data-rkpos]').forEach(function(x){x.classList.remove('on')});c.classList.add('on');
+  rkPos=c.dataset.rkpos;renderRookies()})});
+$$('[data-rksort]').forEach(function(c){c.addEventListener('click',function(){
+  $$('[data-rksort]').forEach(function(x){x.classList.remove('on')});c.classList.add('on');
+  rkSort=c.dataset.rksort;renderRookies()})});
+renderRookies();
+
 renderDef();function renderDef(){$('#defBody').innerHTML=DEFS.map(function(d,i){var mine=MYDEF===d[0];return '<tr'+(mine?' style="background:rgba(14,58,24,.5)"':'')+'><td class="rk">'+(i+1)+'</td><td class="name">'+d[0]+(mine?' <span class="kbadge" style="background:#1C6E33;color:#5BE08A">MINE</span>':'')+'</td><td class="num" style="color:var(--glow);font-weight:700">'+d[1]+'</td><td class="num">'+d[2]+'</td><td class="num '+(d[3]>0?'up':d[3]<0?'down':'')+'">'+(d[3]>0?'+'+d[3]:(d[3]||'\u2014'))+'</td><td class="num '+(d[4]>0?'up':d[4]<0?'down':'')+'">'+(d[4]>0?'+'+d[4]:(d[4]||'\u2014'))+'</td><td class="sos">'+esc(d[5]||'\u2014')+'</td><td class="act">'+(mine?'<button class="btn-mine" data-undef="1">\u2713 Mine</button>':'<button class="btn-mine" data-defpick="'+d[0]+'">My DEF</button>')+'</td></tr>'}).join('')}
 var PLAN=['Best RB/WR available \u2014 board collapses 34 to 17 by the next pick','Jared Goff (84% available). Fallback Bo Nix or Stafford','WR2. Jordyn Tyson if you want the rookie swing','Top defense (Rams or Denver) or receiver depth','Blake Corum \u2014 100% available this deep','McCaffrey handcuff / upside stash','Depth','Depth','Upside dart','Upside dart','Upside dart','Upside dart','KICKER \u2014 final pick only'];
 $('#pickBody').innerHTML=PICKS.map(function(p,i){return '<tr><td class="num" style="color:var(--glow);font-weight:700">#'+p[0]+'</td><td class="pos">'+p[1]+'</td><td>'+PLAN[i]+'</td></tr>'}).join('');
@@ -1005,7 +1202,7 @@ function renderCounts(){
   var u=$('#btnUndo');if(u)u.disabled=ORDER.length===0;
 }
 function refreshAll(){
-  cleanTiers(curCPos); renderPool(); renderRounds(); renderDef();
+  cleanTiers(curCPos); renderPool(); renderRounds(); renderDef(); renderRookies();
   renderNeedBar(); renderRoster(); renderTargets(); renderCounts();
 }
 /* ===== SEARCH TYPE-AHEAD (shared by Available Pool + Round Board) ===== */
