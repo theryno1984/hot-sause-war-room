@@ -261,9 +261,10 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
  padding:8px 14px;font:700 12px/1.2 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
 .btn-sync.on{background:#0E3A18;border-color:#1C6E33;color:#5BE08A}
 
-.reconbar{margin:14px auto 0;max-width:1180px;padding:12px 16px;border-radius:9px;
+.reconbar{position:fixed;top:0;left:0;right:0;z-index:9999;margin:0;border-radius:0;max-width:none;padding:12px 16px;border-radius:9px;
  background:#08210F;border:1px solid #1C6E33;color:#7FE3A2;font-family:'Instrument Sans',sans-serif}
-.reconbar.bad{background:#3A2A02;border-color:#FFC53D;color:#FFD87A;box-shadow:0 0 20px rgba(255,197,61,.22)}
+.reconbar.bad{background:#3A2A02;border-color:#FFC53D;color:#FFD87A;box-shadow:0 6px 24px rgba(0,0,0,.5);border-bottom:2px solid #FFC53D}
+body.hasrecon{padding-top:64px}
 .reconbar b{display:block;font:700 13px/1.3 'Oswald',sans-serif;letter-spacing:.07em;text-transform:uppercase}
 .reconbar .rmeta{display:block;font-family:'JetBrains Mono',monospace;font-size:11.5px;opacity:.85;margin-top:3px}
 .unres{margin-top:10px;display:flex;flex-direction:column;gap:8px}
@@ -277,9 +278,43 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
  font:700 12px/1.2 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
 .defgone{opacity:.4}
 .defgone .name{text-decoration:line-through}
+
+.btn-tgt{background:#17111F;border:1px solid #4A2C6B;color:#9A6FD0;border-radius:5px;padding:6px 9px;font-size:13px;cursor:pointer;line-height:1}
+.btn-tgt.on{background:#4A2C6B;border-color:#B98BEA;color:#EBD8FF}
+.tgtdot{color:#B98BEA}
+.prow.is-tgt{background:linear-gradient(90deg,rgba(122,74,180,.18),transparent);border-left:3px solid #B98BEA}
+tr.is-tgt td,.acrow.is-tgt{background:rgba(122,74,180,.12)!important}
+.acrow.is-tgt{border-left:3px solid #B98BEA;padding-left:9px}
+
+.wrbar{display:flex;align-items:center;gap:14px;margin:0 0 18px;padding:0 2px}
+.wrstate .ok{color:#5BE08A;font:600 12px 'Instrument Sans',sans-serif}
+.wrstate .edited{color:#FFC53D;font:600 12px 'Instrument Sans',sans-serif}
+.wrpanel{background:#0E0E11;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 16px}
+.wrpanel.wrnull{border-color:#3A3A44;opacity:.92}
+.wrpanel.wrsoon{border-style:dashed;opacity:.85}
+.wrh{font:700 15px/1.2 'Oswald',sans-serif;letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px;color:var(--bone)}
+.wrtag{font:700 9px/1.4 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;border:1px solid #4A4A54;border-radius:3px;padding:2px 6px;color:#9A9AA4;vertical-align:middle;margin-left:8px}
+.wrtag.good{border-color:#1C6E33;color:#5BE08A}
+.wrnote{font-size:12.5px;color:var(--dim);line-height:1.5;margin:0 0 12px;max-width:70ch}
+.wrgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px}
+@media(max-width:720px){.wrgrid{grid-template-columns:1fr}}
+.wrrow{display:grid;grid-template-columns:120px 1fr 72px;align-items:center;gap:10px;font-size:13px}
+.wrrow span{color:var(--bone)}
+.wrrow input[type=range]{accent-color:#B98BEA}
+.wrrow input[type=number]{background:#0B0B0E;border:1px solid #3A0710;color:#EDEDF0;border-radius:5px;padding:5px 7px;font-size:12px}
+.fragrow{display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid rgba(46,46,51,.4)}
+.fragn{flex:1;font-weight:600;font-size:13.5px}
+.fragv{font-family:'JetBrains Mono',monospace;color:#FFC53D;font-size:13px}
+.wraddrow{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.wrlist{margin:0;padding-left:18px;font-size:12.5px;color:var(--dim);line-height:1.6}
+.wrlist b{color:var(--bone)}
+.leaguefold{margin:12px 0 6px;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.leaguefold summary{cursor:pointer;font:700 12px 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.leaguefold[open] summary{margin-bottom:10px;color:var(--bone)}
 </style>
 </head>
 <body>
+<div id="reconBar" class="reconbar" hidden></div>
 <div class="aura" aria-hidden="true"></div>
 <header class="masthead">
   <div class="brand">
@@ -296,7 +331,7 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
   <button role="tab" aria-selected="false" data-tab="rookies">Rookies</button>
   <button role="tab" aria-selected="false" data-tab="def">Defense</button>
   <button role="tab" aria-selected="false" data-tab="scoring">Scoring</button>
-  <button role="tab" aria-selected="false" data-tab="league">League</button>
+  <button role="tab" aria-selected="false" data-tab="weightroom">Weight Room</button>
   <button role="tab" aria-selected="false" data-tab="keepers">My Team</button>
 </nav>
 <main>
@@ -346,6 +381,9 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
 
 <section id="warroom" class="panel">
   <div class="rail"><p class="eyebrow">Draft plan</p><h2>Thirteen picks, ten that matter</h2></div>
+  <details class="leaguefold"><summary>League &amp; keepers &mdash; all 12 rosters</summary>
+    <div id="leagueWrap" class="league"></div>
+  </details>
   <div class="rail" style="margin-top:8px"><p class="eyebrow" style="color:var(--glow-hot)">Live targets</p><h3 style="margin:0 0 4px">Five best picks on the board right now</h3>
   <p class="lede" style="font-size:15px">Ranked by keeper-adjusted value, filtered to what you still need. Updates the moment anyone is tagged. Draft one straight from here.</p></div>
   <div class="targets" id="tgtList"></div>
@@ -412,11 +450,46 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
       <p class="tail">A Goff to St. Brown touchdown pays twice in this format: 6 for the pass, 6 for the catch, plus a completion, a reception and yards on both sides. Stacking is worth more here than anywhere else.</p></article>
   </div>
 </section>
-<section id="league" class="panel">
-  <div class="rail"><p class="eyebrow">All twelve rosters</p><h2>38 keepers, draft order reverse of finish</h2>
-  <p class="lede">Slot order runs from last place to first. Keepers are marked. Teams missing a position entirely are flagged — those are the ones who chase hardest early.</p></div>
-  <div class="equation"><span>my first live pick</span><strong>57 &minus; K</strong><span>K = 38 &rarr; pick #31</span></div>
-  <div id="leagueWrap" class="league"></div>
+<section id="weightroom" class="panel">
+  <div class="rail"><p class="eyebrow">Scoring algorithm</p><h2>The Weight Room</h2>
+  <p class="lede">Every lever that shapes the board, in one place. At default settings the board is exactly what you have now. Edit a weight and the whole board recomputes live. Reset (press twice) restores standard scoring. Your hand-calibrated reads are frozen and never touched by any slider.</p></div>
+
+  <div class="wrbar"><button class="btn-reset" id="btnWReset">Reset to standard</button><span id="wrState" class="wrstate"></span></div>
+
+  <div class="wrpanel">
+    <h3 class="wrh">Replacement baselines</h3>
+    <p class="wrnote">The zero-point for each position&rsquo;s value. Raising a baseline lowers everyone at that position. This is the core scoring lever &mdash; the thing every VORP number keys off.</p>
+    <div class="wrgrid" id="wrBase"></div>
+  </div>
+
+  <div class="wrpanel">
+    <h3 class="wrh">Position nudges</h3>
+    <p class="wrnote">A blunt percentage thumb on the scale for a whole position &mdash; e.g. if you think RB is scarcer than the model says. Type-A: this overrides the projection, so use sparingly.</p>
+    <div class="wrgrid" id="wrPos"></div>
+  </div>
+
+  <div class="wrpanel wrnull">
+    <h3 class="wrh">Proven not to move the needle <span class="wrtag">off by default</span></h3>
+    <p class="wrnote">We backtested these against 2025 outcomes and found near-zero predictive value &mdash; the projections already price them in. Left here so you&rsquo;re never blocked, defaulted to zero so they never silently corrupt the board. Turn them up only if you have a reason the data didn&rsquo;t see.</p>
+    <div class="wrgrid" id="wrNull"></div>
+  </div>
+
+  <div class="wrpanel">
+    <h3 class="wrh">Incumbent fragility <span class="wrtag good">your reads</span></h3>
+    <p class="wrnote">The rookie engine&rsquo;s injury map. Mark a blocker as fragile and every rookie behind him gets a path-probability boost. This is the edge &mdash; things no analyst has priced. Keyed to the incumbent so the reason is recorded, not the conclusion.</p>
+    <div id="wrFragile"></div>
+    <div class="wraddrow"><input id="wrFragName" list="allPlayers" placeholder="incumbent name" class="uinput"><input id="wrFragVal" type="number" step="0.05" min="0" max="1" placeholder="0.30" class="usel" style="width:90px"><button class="ubtn" id="wrFragAdd">Add fragility read</button></div>
+  </div>
+
+  <div class="wrpanel wrsoon">
+    <h3 class="wrh">Next: new signals <span class="wrtag">needs data import</span></h3>
+    <p class="wrnote">Three inputs we validated as promising but can&rsquo;t wire up without importing more data (they&rsquo;re not in the board rows yet):</p>
+    <ul class="wrlist">
+      <li><b>Touch-share confidence.</b> Backtested real: high-volume players&rsquo; outcomes are ~2&times; more reliable (stdev 0.29 vs 0.51). Ships as a confidence/volatility tag beside each projection, not a value multiplier.</li>
+      <li><b>Age curves.</b> Feeds fragility &amp; upside, not a raw multiplier &mdash; Sleeper already prices the age curve (corr 0.14, non-monotonic).</li>
+      <li><b>Vegas props.</b> The one external signal worth chasing. Pull season props, convert to our scoring, show as a second projection column &mdash; ship only if it beats Sleeper in a 2025 backtest.</li>
+    </ul>
+  </div>
 </section>
 <section id="keepers" class="panel">
   <div class="rail"><p class="eyebrow">Live roster</p><h2>My team, building in real time</h2>
@@ -427,7 +500,6 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
   <h3 class="sub">Keeper grades</h3>
   <div id="myWrap" class="cards"></div>
 </section>
-<div id="reconBar" class="reconbar" hidden></div>
 <datalist id="allPlayers"></datalist>
 <div class="draftctl">
   <button class="btn-undo" id="btnUndo" disabled>↩ Undo last pick</button>
@@ -865,6 +937,92 @@ function rookCalc(name){
 }
 var ROOKUP={};Object.keys(ROOKRAW).forEach(function(n){ROOKUP[n]=rookCalc(n)});
 var PLAYERS=ROWS.trim().split('\n').map(function(line){var c=line.split('~');return{n:c[0],p:c[1],t:c[2],pts:+c[3],v:+c[4],tier:+c[5],rk:+c[6],prk:+c[7],adp:c[8]===''?null:+c[8],fmt:+c[9],g:c[10],note:c[11]||'',avail:c[12]==='1',kv:c[13]===''?null:+c[13],sos:c[14]||'',rook:c[15]==='1'}});
+/* ===== WEIGHT ROOM ENGINE =====
+   The board's v/kv/rank/tier are recomputed from each player's projected points
+   plus a set of WEIGHTS. Every weight defaults to a NEUTRAL value, so at load
+   the recompute reproduces the exact shipped board (validated). Weights only
+   change the board when the owner edits them here.
+   HARD RULES:
+   - Hand-calibrated overrides are frozen and never recomputed.
+   - Weights we PROVED do not predict outcomes (O-line, offense, raw age) ship
+     at zero and are labelled as such — present so the owner is never blocked,
+     off so they never silently corrupt the board. */
+var STD_BASELINE={RB:119.0,WR:120.9,TE:106.0,QB:327.0};
+// per-player immutable originals
+var ORIG={};
+PLAYERS.forEach(function(p){ORIG[p.n]={v:p.v,kv:p.kv,pts:p.pts,tier:p.tier,rk:p.rk,prk:p.prk};});
+// hand overrides: kv that does NOT equal pts - standard baseline (owner's reads)
+var HANDSET={};
+PLAYERS.forEach(function(p){
+  if(p.kv==null||isNaN(p.pts))return;
+  var implied=p.pts-STD_BASELINE[p.p];
+  if(Math.abs(p.kv-implied)>1.0) HANDSET[p.n]=p.kv;  // freeze these
+});
+// team ratings for the (validated-null) levers — normalized -1..+1, 0 = average
+var TEAM_OFF={}, TEAM_OL={};
+(function(){
+  // offense: from our own board (sum of positive kv by team), z-scored
+  var tot={},teams=[];
+  PLAYERS.forEach(function(p){if(p.kv>0){tot[p.t]=(tot[p.t]||0)+p.kv;}});
+  for(var t in tot)teams.push(t);
+  var vals=teams.map(function(t){return tot[t]}),mean=vals.reduce(function(a,b){return a+b},0)/vals.length;
+  var sd=Math.sqrt(vals.reduce(function(a,b){return a+(b-mean)*(b-mean)},0)/vals.length)||1;
+  teams.forEach(function(t){TEAM_OFF[t]=Math.max(-1,Math.min(1,(tot[t]-mean)/sd/2))});
+  // O-line: 2024 final run-block tiers (nfllines.com), best +1 .. worst -1
+  var best={BAL:1,WAS:.8,ARI:.6,PHI:.5,TB:.4}, worst={LV:-1,MIA:-.8,HOU:-.6,CLE:-.5,SEA:-.4};
+  for(var b in best)TEAM_OL[b]=best[b]; for(var w in worst)TEAM_OL[w]=worst[w];
+})();
+var STD_WEIGHTS={
+  base:{RB:119.0,WR:120.9,TE:106.0,QB:327.0},
+  posAdj:{QB:0,RB:0,WR:0,TE:0},   // % nudge per position, Type-A, owner's call
+  oline:0, offense:0, age:0        // PROVEN NULL — default off
+};
+var WKEY='hotsause_weights_v1';
+var WEIGHTS=JSON.parse(JSON.stringify(STD_WEIGHTS));
+try{var sw=JSON.parse(localStorage.getItem(WKEY));if(sw)WEIGHTS=Object.assign(JSON.parse(JSON.stringify(STD_WEIGHTS)),sw);}catch(e){}
+function saveWeights(){try{localStorage.setItem(WKEY,JSON.stringify(WEIGHTS))}catch(e){}}
+function weightsAreDefault(){return JSON.stringify(WEIGHTS)===JSON.stringify(STD_WEIGHTS);}
+function recomputeBoard(){
+  if(weightsAreDefault()){                            // no edits -> restore shipped board EXACTLY
+    PLAYERS.forEach(function(p){var o=ORIG[p.n];if(!o)return;p.v=o.v;p.kv=o.kv;p.prk=o.prk;p.rk=o.rk;p.tier=o.tier;});
+    return;
+  }
+  PLAYERS.forEach(function(p){
+    if(p.kv==null||ORIG[p.n]==null){return;}         // sync-only rows (kickers) untouched
+    if(HANDSET[p.n]!=null){                            // frozen owner reads
+      p.v=ORIG[p.n].v; p.kv=HANDSET[p.n]; return;
+    }
+    /* Start from the SHIPPED original value (not pts-baseline: pts is rounded in
+       the data, so recomputing from it drifts by up to a point). Apply the
+       baseline change as a DELTA, then multipliers. At default weights every
+       delta is zero and every multiplier is 1, so the board is byte-identical. */
+    var baseDelta=STD_BASELINE[p.p]-WEIGHTS.base[p.p];  // raising baseline lowers v
+    var v=ORIG[p.n].v+baseDelta;
+    var mult=1
+      + (WEIGHTS.posAdj[p.p]||0)/100
+      + (WEIGHTS.oline*(TEAM_OL[p.t]||0))
+      + (WEIGHTS.offense*(TEAM_OFF[p.t]||0));
+    p.v=v;
+    p.kv=(ORIG[p.n].kv+baseDelta)*mult;
+  });
+  // re-derive position ranks + overall rank from new kv/v
+  /* Re-rank ONLY the players whose order changed, preserving the shipped
+     numbering scheme: rank over ALL valued players (incl kept) by new v, using
+     stored order as the tie-break so the baseline is continuous. */
+  function cmp(a,b){var d=b.v-a.v;if(Math.abs(d)>1e-9)return d;return (ORIG[a.n]?ORIG[a.n].prk:999)-(ORIG[b.n]?ORIG[b.n].prk:999);}
+  ['QB','RB','WR','TE'].forEach(function(pos){
+    var seq=PLAYERS.filter(function(p){return p.p===pos&&p.kv!=null&&ORIG[p.n]}).sort(cmp);
+    // preserve the shipped starting offset (kept players occupy low ranks)
+    var offs=seq.map(function(p){return ORIG[p.n].prk;}).sort(function(a,b){return a-b;});
+    seq.forEach(function(p,i){p.prk=offs[i];});
+  });
+  function cmpO(a,b){var d=b.v-a.v;if(Math.abs(d)>1e-9)return d;return (ORIG[a.n]?ORIG[a.n].rk:999)-(ORIG[b.n]?ORIG[b.n].rk:999);}
+  var seqO=PLAYERS.filter(function(p){return p.kv!=null&&ORIG[p.n]}).sort(cmpO);
+  var offsO=seqO.map(function(p){return ORIG[p.n].rk;}).sort(function(a,b){return a-b;});
+  seqO.forEach(function(p,i){p.rk=offsO[i];});
+}
+function resetWeights(){WEIGHTS=JSON.parse(JSON.stringify(STD_WEIGHTS));saveWeights();recomputeBoard();refreshAll();renderWeightRoom();}
+
 var idx={};PLAYERS.forEach(function(p){idx[p.n]=p});
 function alias(n){var a={'Kyle Pitts Sr.':'Kyle Pitts','Harold Fannin Jr.':'Harold Fannin','Luther Burden III':'Luther Burden','James Cook III':'James Cook','Travis Etienne Jr.':'Travis Etienne','Deebo Samuel Sr.':'Deebo Samuel','Chris Godwin Jr.':'Chris Godwin','DJ Moore':'D.J. Moore','Oronde Gadsden':'Oronde Gadsden II'};return a[n]||n}
 
@@ -898,6 +1056,15 @@ function undoLast(){
    tagging at all). Together those mean stale picks from an old mock re-tag
    themselves after every refresh — and on draft day that would silently mark
    AVAILABLE players as drafted. Arming it is a deliberate act. */
+var TGTKEY='hotsause_targets_v1';
+var TARGETS={};
+try{TARGETS=JSON.parse(localStorage.getItem(TGTKEY))||{}}catch(e){TARGETS={}}
+function saveTargets(){try{localStorage.setItem(TGTKEY,JSON.stringify(TARGETS))}catch(e){}}
+function toggleTarget(name){
+  if(TARGETS[name])delete TARGETS[name]; else TARGETS[name]=1;
+  saveTargets(); refreshAll();
+}
+function isTarget(n){return !!TARGETS[n]}
 var SYNCKEY='hotsause_sync_on_v1';
 var SYNC_ON=false;
 try{SYNC_ON=localStorage.getItem(SYNCKEY)==='1'}catch(e){}
@@ -1048,10 +1215,10 @@ function renderRecon(){
   var el=$('#reconBar'); if(!el)return;
   var seen=Object.keys(SYNC_SEEN).length;
   var un=Object.keys(SYNC_UNRESOLVED);
-  if(!SYNC_ON&&seen===0){ el.hidden=true; return; }
+  if(!SYNC_ON&&seen===0){ el.hidden=true; document.body.classList.remove('hasrecon'); return; }
   var acct=Object.keys(DRAFT).length+Object.keys(DEFGONE).length+(MYDEF?1:0);
   var bad=un.length>0;
-  el.hidden=false;
+  el.hidden=false; document.body.classList.add('hasrecon');
   el.className='reconbar'+(bad?' bad':'');
   var head='<b>'+(bad?'\u26A0 '+un.length+' pick'+(un.length>1?'s':'')+' unresolved':'\u2713 sync reconciled')+'</b>'+
     '<span class="rmeta">Yahoo has shown '+seen+' pick'+(seen===1?'':'s')+
@@ -1151,7 +1318,7 @@ function poolActBtns(p){
   return actBtns(p.n);
 }
 function renderPool(){var rows=avail.filter(function(p){if(poolGone(p))return false;if(apos!=='ALL'&&p.p!==apos)return false;if(aterm&&p.n.toLowerCase().indexOf(aterm)===-1)return false;return true}).sort(poolSort).slice(0,90);
-$('#poolBody').innerHTML=rows.map(function(p){var w=Math.max(2,(p.kv/maxKV)*100);var flag=p.sos.indexOf('EASIEST')>-1?'up':(p.sos.indexOf('TOUGHEST')>-1?'down':'');var mineDef=p.isDef&&MYDEF===p.defTeam;return '<tr'+(mineDef?' style="background:rgba(14,58,24,.5)"':'')+'><td class="rk">'+p.ark+'</td><td class="name">'+esc(p.n)+(mineDef?' <span class="kbadge" style="background:#1C6E33;color:#5BE08A">MINE</span>':'')+(p.rook?' <span class="rookpin">R</span>':'')+'</td><td class="pos c">'+p.p+(p.isDef?'':p.prk)+'</td><td class="pos c">'+p.t+'</td><td class="vcell"><span class="bar"><i style="width:'+w+'%"></i><b>'+p.kv.toFixed(0)+'</b></span></td><td class="num">'+(p.adp==null?'\u2014':p.adp)+'</td><td class="sos '+flag+'">'+esc(p.sos||'\u2014')+'</td><td class="act">'+poolActBtns(p)+'</td></tr>'}).join('')||'<tr><td colspan="8" style="padding:26px;color:#8A8A93">No players match.</td></tr>'}
+$('#poolBody').innerHTML=rows.map(function(p){var w=Math.max(2,(p.kv/maxKV)*100);var flag=p.sos.indexOf('EASIEST')>-1?'up':(p.sos.indexOf('TOUGHEST')>-1?'down':'');var mineDef=p.isDef&&MYDEF===p.defTeam;var tgt=isTarget(p.n);return '<tr'+(tgt?' class="is-tgt"':'')+(mineDef?' style="background:rgba(14,58,24,.5)"':'')+'><td class="rk">'+p.ark+'</td><td class="name">'+(tgt?'<span class="tgtdot">\u2605</span> ':'')+esc(p.n)+(mineDef?' <span class="kbadge" style="background:#1C6E33;color:#5BE08A">MINE</span>':'')+(p.rook?' <span class="rookpin">R</span>':'')+'</td><td class="pos c">'+p.p+(p.isDef?'':p.prk)+'</td><td class="pos c">'+p.t+'</td><td class="vcell"><span class="bar"><i style="width:'+w+'%"></i><b>'+p.kv.toFixed(0)+'</b></span></td><td class="num">'+(p.adp==null?'\u2014':p.adp)+'</td><td class="sos '+flag+'">'+esc(p.sos||'\u2014')+'</td><td class="act">'+poolActBtns(p)+'</td></tr>'}).join('')||'<tr><td colspan="8" style="padding:26px;color:#8A8A93">No players match.</td></tr>'}
 $$('[data-apos]').forEach(function(c){c.addEventListener('click',function(){$$('[data-apos]').forEach(function(x){x.classList.remove('on')});c.classList.add('on');apos=c.dataset.apos;renderPool()})});
 $('#aq').addEventListener('input',function(e){aterm=e.target.value.toLowerCase().trim();renderPool()});
 $$('#pool th.sortable').forEach(function(th){th.addEventListener('click',function(){var k=th.dataset.sort;if(sortKey===k){sortDir=sortDir==='asc'?'desc':'asc';}else{sortKey=k;sortDir=(k==='adp')?'asc':'desc';}syncPoolCarets();renderPool()})});
@@ -1252,9 +1419,9 @@ function playerRow(p,nxt,fit){
   var posCell=p.isDef?'DEF':(p.p+p.prk);
   var mktCell=p.isDef?'value pick':('ADP '+(p.adp==null?'\u2014':p.adp)+' \u00b7 mkt R'+p.mr);
   var actCell=p.isDef?(MYDEF===p.defTeam?'<button class="btn-mine" data-undef="1">\u2713 My DEF</button>':'<button class="btn-mine" data-defpick="'+p.defTeam+'">My DEF</button>'):actBtns(p.n);
-  return '<li class="prow '+st+(isFit?' s-fit':'')+'">'+
+  return '<li class="prow '+st+(isFit?' s-fit':'')+(isTarget(p.n)?' is-tgt':'')+'">'+
     '<span class="pk">'+p.lp+'</span>'+
-    '<span class="pnm">'+esc(p.n)+(p.rook?' <span class="rookpin">R</span>':'')+tag+(p.note?'<i>'+esc(p.note)+'</i>':'')+'</span>'+
+    '<span class="pnm">'+(isTarget(p.n)?'<span class="tgtdot">\u2605</span> ':'')+esc(p.n)+(p.rook?' <span class="rookpin">R</span>':'')+tag+(p.note?'<i>'+esc(p.note)+'</i>':'')+'</span>'+
     '<span class="ppos">'+posCell+'</span>'+
     '<span class="ptm">'+p.t+'</span>'+
     '<span class="pval">'+p.kv.toFixed(0)+'</span>'+
@@ -1430,7 +1597,7 @@ function renderTargets(){
   $('#tgtList').innerHTML=five.map(function(p,i){var openHere=openPos.indexOf(p.p)>-1;return '<div class="tgt"><span class="trank">'+(i+1)+'</span><span class="tnm">'+esc(p.n)+(openHere?' <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:#5BE08A;border:1px solid #1C6E33;border-radius:2px;padding:1px 5px;vertical-align:middle">FILLS NEED</span>':'')+'<small>'+p.p+p.prk+' \u00b7 '+p.t+' \u00b7 keeper-adj '+p.kv.toFixed(0)+(p.sos?' \u00b7 '+esc(p.sos.replace(/;.*/,'')):'')+'</small></span><span class="tval">'+p.kv.toFixed(0)+'</span><span class="tbtns">'+actBtns(p.n)+'</span></div>'}).join('');
 }
 /* ===== SHARED: action buttons + refresh ===== */
-function actBtns(name){return '<button class="btn-draft" data-draft="'+encodeURIComponent(name)+'">Drafted</button><button class="btn-mine" data-mine="'+encodeURIComponent(name)+'">My Pick</button>'}
+function actBtns(name){var t=isTarget(name);return '<button class="btn-tgt'+(t?' on':'')+'" data-tgt="'+encodeURIComponent(name)+'" title="'+(t?'Remove target':'Target this player')+'">\u2605</button><button class="btn-draft" data-draft="'+encodeURIComponent(name)+'">Drafted</button><button class="btn-mine" data-mine="'+encodeURIComponent(name)+'">My Pick</button>'}
 function renderCounts(){
   var gone=Object.keys(DRAFT).length+(MYDEF?1:0);
   var mine=myPicks().length+(MYDEF?1:0);
@@ -1443,8 +1610,73 @@ function renderCounts(){
   if($('#rbLeft'))$('#rbLeft').textContent=left;
   var u=$('#btnUndo');if(u)u.disabled=ORDER.length===0;
 }
+
+/* ===== WEIGHT ROOM UI ===== */
+function wrRow(label,val,min,max,step,onkey){
+  return '<label class="wrrow"><span>'+label+'</span>'+
+    '<input type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" data-wr="'+onkey+'">'+
+    '<input type="number" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" data-wrn="'+onkey+'"></label>';
+}
+function renderWeightRoom(){
+  if(!$('#wrBase'))return;
+  $('#wrBase').innerHTML=['RB','WR','TE','QB'].map(function(p){
+    return wrRow(p+' baseline',WEIGHTS.base[p],80,360,0.1,'base.'+p);
+  }).join('');
+  $('#wrPos').innerHTML=['RB','WR','TE','QB'].map(function(p){
+    return wrRow(p+' nudge %',WEIGHTS.posAdj[p],-25,25,1,'posAdj.'+p);
+  }).join('');
+  $('#wrNull').innerHTML=[
+    wrRow('O-line weight',WEIGHTS.oline,0,0.5,0.01,'oline'),
+    wrRow('Offense weight',WEIGHTS.offense,0,0.5,0.01,'offense'),
+    wrRow('Age weight',WEIGHTS.age,0,0.5,0.01,'age')
+  ].join('');
+  var keys=Object.keys(FRAGILE);
+  $('#wrFragile').innerHTML=keys.length?keys.map(function(n){
+    return '<div class="fragrow"><span class="fragn">'+esc(n)+'</span><span class="fragv">'+FRAGILE[n].toFixed(2)+'</span><button class="ubtn" data-fragdel="'+encodeURIComponent(n)+'">remove</button></div>';
+  }).join(''):'<p class="wrnote" style="opacity:.6">No fragility reads yet.</p>';
+  var st=$('#wrState');
+  if(st){ st.innerHTML = weightsAreDefault()? '<span class="ok">standard scoring \u2014 board unchanged</span>' : '<span class="edited">custom weights active \u2014 board recomputed</span>'; }
+}
+function setWeight(path,val){
+  val=parseFloat(val); if(isNaN(val))return;
+  var parts=path.split('.');
+  if(parts.length===2)WEIGHTS[parts[0]][parts[1]]=val; else WEIGHTS[parts[0]]=val;
+  saveWeights(); recomputeBoard(); refreshAll(); renderWeightRoom();
+}
+document.addEventListener('input',function(e){
+  var t=e.target;
+  var k=t.getAttribute&&(t.getAttribute('data-wr')||t.getAttribute('data-wrn'));
+  if(k){ setWeight(k,t.value);
+    // sync the paired control
+    var sel='[data-wr="'+k+'"],[data-wrn="'+k+'"]';
+    $$(sel).forEach(function(el){if(el!==t)el.value=t.value;});
+  }
+});
+document.addEventListener('click',function(e){
+  var del=e.target&&e.target.getAttribute&&e.target.getAttribute('data-fragdel');
+  if(del){delete FRAGILE[decodeURIComponent(del)];ROOKUP={};Object.keys(ROOKRAW).forEach(function(n){ROOKUP[n]=rookCalc(n)});renderWeightRoom();refreshAll();}
+});
+(function(){
+  var add=$('#wrFragAdd'); if(!add)return;
+  add.addEventListener('click',function(){
+    var n=$('#wrFragName').value.trim(), v=parseFloat($('#wrFragVal').value);
+    if(!n||isNaN(v))return;
+    FRAGILE[n]=Math.max(0,Math.min(1,v));
+    ROOKUP={};Object.keys(ROOKRAW).forEach(function(nm){ROOKUP[nm]=rookCalc(nm)});
+    $('#wrFragName').value='';$('#wrFragVal').value='';
+    renderWeightRoom(); refreshAll();
+  });
+  $('#btnWReset').addEventListener('click',function(){
+    var b=this;
+    if(!b._armed){b._armed=true;b.textContent='Tap again to reset all weights';setTimeout(function(){b._armed=false;b.textContent='Reset to standard'},3000);return;}
+    b._armed=false;b.textContent='Reset to standard';
+    resetWeights();
+  });
+  renderWeightRoom();
+})();
+
 function refreshAll(){
-  cleanTiers(curCPos); renderPool(); renderRounds(); renderDef(); renderRookies();
+  cleanTiers(curCPos); renderPool(); renderRounds(); renderDef(); renderRookies(); if(typeof renderWeightRoom==='function')try{renderWeightRoom()}catch(e){}
   renderNeedBar(); renderRoster(); renderTargets(); renderCounts();
 }
 /* ===== SEARCH TYPE-AHEAD (shared by Available Pool + Round Board) ===== */
@@ -1487,6 +1719,8 @@ document.addEventListener('change',function(e){
   }
 });
 document.addEventListener('click',function(e){
+  var tg=e.target&&e.target.getAttribute&&e.target.getAttribute('data-tgt');
+  if(tg){toggleTarget(decodeURIComponent(tg));return;}
   var d=e.target&&e.target.getAttribute&&e.target.getAttribute('data-dismiss');
   if(d)dismissPick(d);
 });
