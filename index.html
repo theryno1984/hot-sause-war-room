@@ -260,6 +260,23 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
 .btn-sync{background:#120206;border:1px solid #3A0710;color:#8A8A93;border-radius:6px;
  padding:8px 14px;font:700 12px/1.2 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
 .btn-sync.on{background:#0E3A18;border-color:#1C6E33;color:#5BE08A}
+
+.reconbar{margin:14px auto 0;max-width:1180px;padding:12px 16px;border-radius:9px;
+ background:#08210F;border:1px solid #1C6E33;color:#7FE3A2;font-family:'Instrument Sans',sans-serif}
+.reconbar.bad{background:#3A2A02;border-color:#FFC53D;color:#FFD87A;box-shadow:0 0 20px rgba(255,197,61,.22)}
+.reconbar b{display:block;font:700 13px/1.3 'Oswald',sans-serif;letter-spacing:.07em;text-transform:uppercase}
+.reconbar .rmeta{display:block;font-family:'JetBrains Mono',monospace;font-size:11.5px;opacity:.85;margin-top:3px}
+.unres{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.unrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(0,0,0,.28);padding:8px 10px;border-radius:6px}
+.upick{font:700 12px 'JetBrains Mono',monospace;color:#FFC53D;min-width:74px}
+.uraw{font-size:12px;opacity:.75;min-width:120px}
+.uinput{flex:1 1 220px;background:#0B0B0E;border:1px solid #3A0710;color:#EDEDF0;border-radius:5px;padding:7px 9px;font-size:13px}
+.usel{background:#0B0B0E;border:1px solid #3A0710;color:#EDEDF0;border-radius:5px;padding:7px 9px;font-size:12px}
+.ubtn{background:#1C1C22;border:1px solid #3A3A44;color:#9A9AA4;border-radius:5px;padding:7px 10px;font-size:11.5px;cursor:pointer}
+.btn-clear{background:#120206;border:1px solid #3A0710;color:#8A8A93;border-radius:6px;padding:8px 14px;
+ font:700 12px/1.2 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.defgone{opacity:.4}
+.defgone .name{text-decoration:line-through}
 </style>
 </head>
 <body>
@@ -410,14 +427,17 @@ td.act .btn-draft,td.act .btn-mine{padding:5px 9px;font-size:10px;margin-left:5p
   <h3 class="sub">Keeper grades</h3>
   <div id="myWrap" class="cards"></div>
 </section>
+<div id="reconBar" class="reconbar" hidden></div>
+<datalist id="allPlayers"></datalist>
 <div class="draftctl">
   <button class="btn-undo" id="btnUndo" disabled>↩ Undo last pick</button>
   <button class="btn-sync" id="btnSync" title="Not reading Yahoo.">○ Yahoo sync off</button>
+  <button class="btn-clear" id="btnClearSync" title="Wipe the extension's stored picks">Clear sync data</button>
   <button class="btn-reset" id="btnReset">Reset draft</button>
 </div>
 </main>
 <footer>
-<p>Built for one league. 2025 production from Pro-Football-Reference. 2026 opportunity, touchdown-regression and personnel adjustments are model estimates. Positional strength of schedule is derived from published 2025 fantasy points allowed and weighted deliberately small. Weeks 16–17 playoff schedule is not yet modelled. No kickers, by standing rule.</p>
+<p>Built for one league. 2025 production from Pro-Football-Reference. 2026 opportunity, touchdown-regression and personnel adjustments are model estimates. Positional strength of schedule is derived from published 2025 fantasy points allowed and weighted deliberately small. Weeks 16–17 playoff schedule is not yet modelled. No kicker rankings, by standing rule — but all 30 kickers are in the player data so Yahoo kicker picks tag automatically instead of landing in the unresolved list.</p>
 <p class="stamp">Last build 11 Aug 2026</p>
 </footer>
 <script>
@@ -739,6 +759,36 @@ Carson Beck~QB~ARI~60~-267.0~9~314~35~330~0~~~1~-267.0~~1
 Kirk Cousins~QB~LV~50~-277.0~9~315~36~260~0~~~1~-277.0~~0
 Justin Fields~QB~KC~37~-290.1~9~316~37~359~0~~~1~-290.1~~0
 Carson Wentz~QB~MIN~15~-312.1~9~317~38~364~0~~~1~-312.1~~0
+Brandon Aubrey~K~DAL~~~~900~1~81~~~sync only — no kicker rankings by standing rule~1~~~0
+Ka'imi Fairbairn~K~HOU~~~~901~2~123~~~sync only — no kicker rankings by standing rule~1~~~0
+Cameron Dicker~K~LAC~~~~902~3~133~~~sync only — no kicker rankings by standing rule~1~~~0
+Jason Myers~K~SEA~~~~903~4~140~~~sync only — no kicker rankings by standing rule~1~~~0
+Cam Little~K~JAX~~~~904~5~159~~~sync only — no kicker rankings by standing rule~1~~~0
+Nick Folk~K~ATL~~~~905~6~169~~~sync only — no kicker rankings by standing rule~1~~~0
+Jake Elliott~K~PHI~~~~906~7~171~~~sync only — no kicker rankings by standing rule~1~~~0
+Wil Lutz~K~DEN~~~~907~8~195~~~sync only — no kicker rankings by standing rule~1~~~0
+Harrison Butker~K~KC~~~~908~9~198~~~sync only — no kicker rankings by standing rule~1~~~0
+Harrison Mevis~K~LAR~~~~909~10~201~~~sync only — no kicker rankings by standing rule~1~~~0
+Tyler Bass~K~BUF~~~~910~11~206~~~sync only — no kicker rankings by standing rule~1~~~0
+Will Reichard~K~MIN~~~~911~12~212~~~sync only — no kicker rankings by standing rule~1~~~0
+Jake Bates~K~DET~~~~912~13~213~~~sync only — no kicker rankings by standing rule~1~~~0
+Chris Boswell~K~PIT~~~~913~14~214~~~sync only — no kicker rankings by standing rule~1~~~0
+Tyler Loop~K~BAL~~~~914~15~216~~~sync only — no kicker rankings by standing rule~1~~~0
+Chase McLaughlin~K~TB~~~~915~16~217~~~sync only — no kicker rankings by standing rule~1~~~0
+Evan McPherson~K~CIN~~~~916~17~218~~~sync only — no kicker rankings by standing rule~1~~~0
+Eddy Pineiro~K~SF~~~~917~18~219~~~sync only — no kicker rankings by standing rule~1~~~0
+Cairo Santos~K~CHI~~~~918~19~220~~~sync only — no kicker rankings by standing rule~1~~~0
+Andy Borregales~K~NE~~~~919~20~221~~~sync only — no kicker rankings by standing rule~1~~~0
+Charlie Smyth~K~NO~~~~920~21~275~~~sync only — no kicker rankings by standing rule~1~~~0
+Trey Smack~K~GB~~~~921~22~279~~~sync only — no kicker rankings by standing rule~1~~~0
+Spencer Shrader~K~IND~~~~922~23~357~~~sync only — no kicker rankings by standing rule~1~~~0
+Zane Gonzalez~K~MIA~~~~923~24~360~~~sync only — no kicker rankings by standing rule~1~~~0
+Jake Moody~K~WAS~~~~924~25~361~~~sync only — no kicker rankings by standing rule~1~~~0
+Brandon McManus~K~GB~~~~925~26~365~~~sync only — no kicker rankings by standing rule~1~~~0
+Joey Slye~K~TEN~~~~926~27~367~~~sync only — no kicker rankings by standing rule~1~~~0
+Chad Ryland~K~ARI~~~~927~28~370~~~sync only — no kicker rankings by standing rule~1~~~0
+Blake Grupe~K~IND~~~~928~29~371~~~sync only — no kicker rankings by standing rule~1~~~0
+Matt Gay~K~LV~~~~929~30~374~~~sync only — no kicker rankings by standing rule~1~~~0
 `;
 const TEAMS={"Uncle Better Toe Joe":{"place":12,"slot":1,"keep":["Nico Collins","Omarion Hampton"],"roster":[["QB","Caleb Williams"],["WR","Nico Collins"],["WR","Jordan Addison"],["RB","Kyle Monangai"],["RB","RJ Harvey"],["TE","Kyle Pitts Sr."],["W/T","Jameson Williams"],["W/R","Omarion Hampton"],["BN","Jacory Croskey-Merritt"],["BN","Rome Odunze"],["BN","Malik Washington"],["BN","Baker Mayfield"],["BN","Blake Corum"],["IR","Alvin Kamara"]]},
 "Saquon It Ain't So":{"place":11,"slot":2,"keep":["Saquon Barkley","DeVonta Smith"],"roster":[["QB","Justin Herbert"],["WR","Michael Pittman Jr."],["WR","Wan'Dale Robinson"],["RB","Aaron Jones Sr."],["RB","Saquon Barkley"],["TE","Harold Fannin Jr."],["W/T","DeVonta Smith"],["W/R","Bucky Irving"],["BN","Colston Loveland"],["BN","Luther Burden III"],["BN","Marvin Harrison Jr."],["BN","Joe Flacco"],["BN","Tank Bigsby"],["IR","Travis Hunter"]]},
@@ -863,7 +913,7 @@ function renderSyncBar(){
   b.textContent=SYNC_ON?('\u25CF Yahoo sync LIVE'+(SYNC_TAGGED?' \u00b7 '+SYNC_TAGGED+' tagged':'')):'\u25CB Yahoo sync off';
   b.title=SYNC_ON?'Reading the live Yahoo draft. Tap to stop.':'Not reading Yahoo. Tap to arm when your real draft starts.';
 }
-function resetDraft(){ DRAFT={};ORDER=[];MYDEF=null; setSync(false); saveDraft(); refreshAll(); }
+function resetDraft(){ DRAFT={};ORDER=[];MYDEF=null; SYNC_UNRESOLVED={};SYNC_SEEN={}; setSync(false); saveDraft(); refreshAll(); }
 
 /* ===== YAHOO DRAFT SYNC (from the Hot Sause Draft Sync extension) =====
    The extension delivers a 'hotsause:sync' event with the full pick list
@@ -917,40 +967,145 @@ function matchFromBoard(board){
   }
   return null;
 }
+/* ===== APPLY YAHOO PICKS =====
+   HARD RULE: never guess. A confident wrong answer is far worse than a visible
+   unknown when you get one draft a year.
+   The old code fell back to matchFromBoard(), which walked the ENTIRE scraped
+   Yahoo board and tagged the first row that happened to resolve uniquely. That
+   row had nothing to do with the pick that triggered it — a single unresolvable
+   pick (every kicker, since our pool has none) would silently tag whichever
+   skill player it hit first. In testing it deleted Jahmyr Gibbs off the board
+   and reported success. matchFromBoard is now used ONLY to offer candidate
+   HINTS for manual resolution; it never tags anything by itself. */
+var SYNC_UNRESOLVED={};   // pickId -> {id, playerId, hints:[names]}
+var SYNC_SEEN={};         // pickId -> true, every pick id Yahoo has shown us
+function boardHints(board){
+  if(!Array.isArray(board))return [];
+  var out=[];
+  for(var i=0;i<board.length&&out.length<6;i++){
+    var b=board[i], last=syncNorm(b.last||'');
+    if(!last)continue;
+    PLAYERS.forEach(function(p){
+      if(out.length>=6||isGone(p.n))return;
+      if(b.pos&&p.p!==b.pos)return;
+      if(b.team&&p.t&&p.t.toUpperCase()!==b.team.toUpperCase())return;
+      if(syncNorm(p.n.split(' ').slice(-1)[0])===last&&out.indexOf(p.n)<0)out.push(p.n);
+    });
+  }
+  return out;
+}
 function applyYahooPicks(list){
   if(!Array.isArray(list))return;
-  var tagged=0, missed=[];
+  var tagged=0, changed=false;
   list.forEach(function(pk){
-    if((pk.pos||'').toUpperCase()==='DEF'){          // opponent defense taken -> clear it off our board
+    var pid=(pk.id!=null?String(pk.id):null);
+    if(pid!=null)SYNC_SEEN[pid]=true;
+    if((pk.pos||'').toUpperCase()==='DEF'){
       var dt=matchDefTeam(pk.name||pk.team);
       if(dt&&!DEFGONE[dt]){DEFGONE[dt]=1;tagged++}
+      if(pid!=null&&SYNC_UNRESOLVED[pid]){delete SYNC_UNRESOLVED[pid];changed=true}
       return;
     }
     var appName=pk.name?matchYahooName(pk.name,pk.pos,pk.team):null;
-    if(!appName&&pk.board){ appName=matchFromBoard(pk.board); }
     if(appName){
       if(!DRAFT[appName]){ DRAFT[appName]='theirs'; ORDER.push(appName); tagged++; }
-    } else if(pk.name){
-      missed.push(pk.name);
+      if(pid!=null&&SYNC_UNRESOLVED[pid]){delete SYNC_UNRESOLVED[pid];changed=true}
+      return;
+    }
+    /* Could not resolve. Do NOT tag anything. Surface it instead. */
+    if(pid!=null&&!SYNC_UNRESOLVED[pid]){
+      SYNC_UNRESOLVED[pid]={id:pk.id,playerId:pk.playerId||'',
+        raw:pk.name||'',pos:pk.pos||'',team:pk.team||'',
+        hints:boardHints(pk.board)};
+      changed=true;
     }
   });
-  if(tagged>0){ SYNC_TAGGED+=tagged; saveDraft(); refreshAll(); renderSyncBar(); }
-  if(tagged>0){
-    console.log('[HotSause] sync: tagged '+tagged+' new pick(s)'+(missed.length?'; no match: '+missed.join(', '):''));
+  if(tagged>0){ SYNC_TAGGED+=tagged; saveDraft(); refreshAll(); }
+  renderSyncBar(); renderRecon();
+  if(tagged>0||changed){
+    console.log('[HotSause] sync: '+tagged+' tagged, '+Object.keys(SYNC_UNRESOLVED).length+' unresolved');
   }
+}
+function resolvePick(pid,name){
+  if(!name||!SYNC_UNRESOLVED[pid])return;
+  if(!DRAFT[name]){DRAFT[name]='theirs';ORDER.push(name);SYNC_TAGGED++;}
+  delete SYNC_UNRESOLVED[pid];
+  saveDraft(); refreshAll(); renderRecon(); renderSyncBar();
+}
+function dismissPick(pid){ delete SYNC_UNRESOLVED[pid]; renderRecon(); renderSyncBar(); }
+function clearSyncStore(){
+  try{ window.dispatchEvent(new CustomEvent('hotsause:clearsync')); }catch(e){}
+  SYNC_UNRESOLVED={}; SYNC_SEEN={}; SYNC_TAGGED=0;
+  renderRecon(); renderSyncBar();
+  console.log('[HotSause] asked the extension to clear its stored picks.');
+}
+/* ===== RECONCILIATION =====
+   Yahoo tells us how many picks it has made. We know how many we tagged.
+   If those diverge, something failed — and you find out NOW, not four rounds
+   later. This is the difference between a board that is wrong and a board that
+   is wrong AND silent. */
+function renderRecon(){
+  var el=$('#reconBar'); if(!el)return;
+  var seen=Object.keys(SYNC_SEEN).length;
+  var un=Object.keys(SYNC_UNRESOLVED);
+  if(!SYNC_ON&&seen===0){ el.hidden=true; return; }
+  var acct=Object.keys(DRAFT).length+Object.keys(DEFGONE).length+(MYDEF?1:0);
+  var bad=un.length>0;
+  el.hidden=false;
+  el.className='reconbar'+(bad?' bad':'');
+  var head='<b>'+(bad?'\u26A0 '+un.length+' pick'+(un.length>1?'s':'')+' unresolved':'\u2713 sync reconciled')+'</b>'+
+    '<span class="rmeta">Yahoo has shown '+seen+' pick'+(seen===1?'':'s')+
+    ' \u00b7 board accounts for '+acct+'</span>';
+  var body='';
+  if(bad){
+    body='<div class="unres">'+un.sort(function(a,b){return a-b}).map(function(pid){
+      var u=SYNC_UNRESOLVED[pid];
+      var opts=(u.hints||[]).map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>'}).join('');
+      return '<div class="unrow"><span class="upick">Pick #'+esc(String(u.id))+'</span>'+
+        '<span class="uraw">'+esc(u.raw||('playerId '+u.playerId))+'</span>'+
+        '<input list="allPlayers" class="uinput" data-pid="'+esc(String(pid))+'" placeholder="type the player who was taken\u2026">'+
+        (opts?'<select class="usel" data-pid="'+esc(String(pid))+'"><option value="">candidates\u2026</option>'+opts+'</select>':'')+
+        '<button class="ubtn" data-dismiss="'+esc(String(pid))+'">not in my pool</button></div>';
+    }).join('')+'</div>';
+  }
+  el.innerHTML=head+body;
 }
 window.addEventListener('hotsause:sync',function(e){
   if(!SYNC_ON){ console.log('[HotSause] sync ignored \u2014 not armed. Tap "Yahoo sync off" to enable.'); return; }
   try{ applyYahooPicks((e.detail&&e.detail.picks)||[]); }catch(err){ console.log('[HotSause] sync error',err); }
 });
 var DEFGONE={};
+/* Match a Yahoo defense string to a team code.
+   The old version scanned for 2-3 letter codes as raw substrings, which is
+   catastrophically wrong: "DOLPHINS" contains PHI, "CHIEFS" contains CHI,
+   "NEW ORLEANS"/"NEW YORK"/"TENNESSEE" all contain NE. A Chiefs pick removed
+   the Bears. Now: exact nickname, then city, then code as a WHOLE WORD. */
+var DEFNICK={};
+(function(){
+  for(var code in DEFNAME){
+    var full=DEFNAME[code].toUpperCase();
+    var w=full.split(' ');
+    DEFNICK[w[w.length-1]]=code;                 // CHIEFS, DOLPHINS, 49ERS...
+    DEFNICK[w.slice(0,w.length-1).join(' ')]=code; // KANSAS CITY, MIAMI...
+    DEFNICK[full]=code;
+  }
+})();
 function matchDefTeam(s){
-  if(!s)return null; var q=(''+s).toUpperCase();
-  for(var i=0;i<DEFS.length;i++){var t=DEFS[i][0];
-    if(q.indexOf(t)>-1)return t;}
-  var FULLD=DEFNAME;
-  for(var k in FULLD){if(q.indexOf(FULLD[k].toUpperCase())>-1)return k;
-    var last=FULLD[k].split(' ').pop().toUpperCase(); if(last.length>3&&q.indexOf(last)>-1)return k;}
+  if(!s)return null;
+  var q=(''+s).toUpperCase().replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+  if(!q)return null;
+  if(DEFNICK[q])return DEFNICK[q];                       // exact full name
+  var words=q.split(' ');
+  for(var i=0;i<words.length;i++){                        // exact nickname word
+    if(DEFNICK[words[i]])return DEFNICK[words[i]];
+  }
+  for(var j=words.length;j>1;j--){                        // multi-word city
+    var sub=words.slice(0,j).join(' ');
+    if(DEFNICK[sub])return DEFNICK[sub];
+  }
+  for(var k=0;k<words.length;k++){                        // code as a WHOLE word
+    for(var c in DEFNAME){ if(words[k]===c)return c; }
+  }
   return null;
 }
 function isGone(name){return !!DRAFT[name]}          // off every board
@@ -1154,7 +1309,7 @@ $$('[data-rksort]').forEach(function(c){c.addEventListener('click',function(){
   rkSort=c.dataset.rksort;renderRookies()})});
 renderRookies();
 
-renderDef();function renderDef(){$('#defBody').innerHTML=DEFS.map(function(d,i){var mine=MYDEF===d[0];return '<tr'+(mine?' style="background:rgba(14,58,24,.5)"':'')+'><td class="rk">'+(i+1)+'</td><td class="name">'+d[0]+(mine?' <span class="kbadge" style="background:#1C6E33;color:#5BE08A">MINE</span>':'')+'</td><td class="num" style="color:var(--glow);font-weight:700">'+d[1]+'</td><td class="num">'+d[2]+'</td><td class="num '+(d[3]>0?'up':d[3]<0?'down':'')+'">'+(d[3]>0?'+'+d[3]:(d[3]||'\u2014'))+'</td><td class="num '+(d[4]>0?'up':d[4]<0?'down':'')+'">'+(d[4]>0?'+'+d[4]:(d[4]||'\u2014'))+'</td><td class="sos">'+esc(d[5]||'\u2014')+'</td><td class="act">'+(mine?'<button class="btn-mine" data-undef="1">\u2713 Mine</button>':'<button class="btn-mine" data-defpick="'+d[0]+'">My DEF</button>')+'</td></tr>'}).join('')}
+renderDef();function renderDef(){$('#defBody').innerHTML=DEFS.map(function(d,i){var mine=MYDEF===d[0];var gone=!mine&&!!DEFGONE[d[0]];return '<tr'+(mine?' style="background:rgba(14,58,24,.5)"':(gone?' class="defgone"':''))+'><td class="rk">'+(i+1)+'</td><td class="name">'+d[0]+(mine?' <span class="kbadge" style="background:#1C6E33;color:#5BE08A">MINE</span>':'')+(gone?' <span class="kbadge" style="background:#3A0710;color:#FB1F2E">DRAFTED</span>':'')+'</td><td class="num" style="color:var(--glow);font-weight:700">'+d[1]+'</td><td class="num">'+d[2]+'</td><td class="num '+(d[3]>0?'up':d[3]<0?'down':'')+'">'+(d[3]>0?'+'+d[3]:(d[3]||'\u2014'))+'</td><td class="num '+(d[4]>0?'up':d[4]<0?'down':'')+'">'+(d[4]>0?'+'+d[4]:(d[4]||'\u2014'))+'</td><td class="sos">'+esc(d[5]||'\u2014')+'</td><td class="act">'+(mine?'<button class="btn-mine" data-undef="1">\u2713 Mine</button>':(gone?'<span style="color:#6A6A72;font-size:11px">taken</span>':'<button class="btn-mine" data-defpick="'+d[0]+'">My DEF</button>'))+'</td></tr>'}).join('')}
 var PLAN=['Best RB/WR available \u2014 board collapses 34 to 17 by the next pick','Jared Goff (84% available). Fallback Bo Nix or Stafford','WR2. Jordyn Tyson if you want the rookie swing','Top defense (Rams or Denver) or receiver depth','Blake Corum \u2014 100% available this deep','McCaffrey handcuff / upside stash','Depth','Depth','Upside dart','Upside dart','Upside dart','Upside dart','KICKER \u2014 final pick only'];
 $('#pickBody').innerHTML=PICKS.map(function(p,i){return '<tr><td class="num" style="color:var(--glow);font-weight:700">#'+p[0]+'</td><td class="pos">'+p[1]+'</td><td>'+PLAN[i]+'</td></tr>'}).join('');
 var slots=Object.keys(TEAMS).sort(function(a,b){return TEAMS[a].slot-TEAMS[b].slot});
@@ -1320,7 +1475,22 @@ document.addEventListener('click',function(e){
   if(t.dataset&&t.dataset.undef!=null){MYDEF=null;for(var i=ORDER.length-1;i>=0;i--){if(ORDER[i].indexOf('DEF:')===0){ORDER.splice(i,1);break}}saveDraft();refreshAll();return}
 });
 $('#btnUndo').addEventListener('click',undoLast);
-$('#btnSync').addEventListener('click',function(){setSync(!SYNC_ON)});
+$('#btnSync').addEventListener('click',function(){setSync(!SYNC_ON);renderRecon()});
+$('#btnClearSync').addEventListener('click',clearSyncStore);
+$('#allPlayers').innerHTML=PLAYERS.map(function(p){return '<option value="'+esc(p.n)+'">'}).join('');
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(t.classList&&t.classList.contains('usel')&&t.value){ resolvePick(t.dataset.pid,t.value); }
+  if(t.classList&&t.classList.contains('uinput')&&t.value){
+    var ok=PLAYERS.some(function(p){return p.n===t.value});
+    if(ok)resolvePick(t.dataset.pid,t.value);
+  }
+});
+document.addEventListener('click',function(e){
+  var d=e.target&&e.target.getAttribute&&e.target.getAttribute('data-dismiss');
+  if(d)dismissPick(d);
+});
+renderRecon();
 renderSyncBar();
 (function(){var b=$('#btnReset'),armed=false,to=null;
   b.addEventListener('click',function(){
