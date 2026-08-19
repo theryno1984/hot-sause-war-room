@@ -186,7 +186,7 @@ th.sortable.active{color:var(--glow)}
 .draftbar input.dsearch::placeholder{color:#5A5A62}
 .dcount{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
 .dcount b{color:var(--glow-hot)}
-.ac{position:absolute;top:calc(100% + 5px);left:0;right:0;z-index:20;background:var(--lacquer);border:1px solid var(--glow);border-radius:3px;max-height:340px;overflow:auto;box-shadow:0 18px 40px -12px #000}
+.ac{position:absolute;top:calc(100% + 5px);left:0;right:0;z-index:60;background:var(--lacquer);border:1px solid var(--glow);border-radius:3px;max-height:min(60vh,460px);overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 18px 40px -12px #000}
 .ac:empty{display:none}
 .acrow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid rgba(46,46,51,.5)}
 .acrow:last-child{border-bottom:0}
@@ -325,6 +325,15 @@ tr.is-tgt td:first-child{box-shadow:inset 3px 0 0 #B98BEA}
 .dcpanel li{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:13px;color:#C8C8CE}
 .dcpanel li.dchere{color:#EBD8FF;font-weight:700}
 .dco{font-family:'JetBrains Mono',monospace;color:#6A6A72;width:16px}
+
+@keyframes rowFlash{0%{background:rgba(185,139,234,.45)}100%{background:transparent}}
+.prow.rowflash{animation:rowFlash 1.8s ease-out}
+.acn[data-jump]{cursor:pointer}
+.acn[data-jump]:hover{color:#B98BEA}
+
+.acrow.acjump{grid-template-columns:1fr auto;cursor:pointer}
+.acrow.acjump:hover,.acrow.acjump:focus{background:rgba(185,139,234,.12)}
+.acrow.acjump .acgo{color:#B98BEA;font-size:16px;font-weight:700}
 </style>
 </head>
 <body>
@@ -1489,7 +1498,7 @@ function playerRow(p,nxt,fit){
   var posCell=p.isDef?'DEF':(p.p+p.prk);
   var mktCell=p.isDef?'value pick':('ADP '+(p.adp==null?'\u2014':p.adp)+' \u00b7 mkt R'+p.mr);
   var actCell=p.isDef?(MYDEF===p.defTeam?'<button class="btn-mine" data-undef="1">\u2713 My DEF</button>':'<button class="btn-mine" data-defpick="'+p.defTeam+'">My DEF</button>'):actBtns(p.n);
-  return '<li class="prow '+st+(isFit?' s-fit':'')+(isTarget(p.n)?' is-tgt':'')+'">'+
+  return '<li class="prow '+st+(isFit?' s-fit':'')+(isTarget(p.n)?' is-tgt':'')+'" id="rbrow-'+rowId(p.n)+'">'+
     '<span class="pk">'+p.lp+'</span>'+
     '<span class="pnm">'+(isTarget(p.n)?'<span class="tgtdot">\u2605</span> ':'')+esc(p.n)+(p.rook?' <span class="rookpin">R</span>':'')+injBadge(p.n)+dcCarrot(p)+tag+(p.note?'<i>'+esc(p.note)+'</i>':'')+dcPanel(p)+'</span>'+
     '<span class="ppos">'+posCell+'</span>'+
@@ -1668,6 +1677,23 @@ function renderTargets(){
   $('#tgtList').innerHTML=five.map(function(p,i){var openHere=openPos.indexOf(p.p)>-1;return '<div class="tgt"><span class="trank">'+(i+1)+'</span><span class="tnm">'+esc(p.n)+(openHere?' <span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:#5BE08A;border:1px solid #1C6E33;border-radius:2px;padding:1px 5px;vertical-align:middle">FILLS NEED</span>':'')+'<small>'+p.p+p.prk+' \u00b7 '+p.t+' \u00b7 keeper-adj '+p.kv.toFixed(0)+(p.sos?' \u00b7 '+esc(p.sos.replace(/;.*/,'')):'')+'</small></span><span class="tval">'+p.kv.toFixed(0)+'</span><span class="tbtns">'+actBtns(p.n)+'</span></div>'}).join('');
 }
 /* ===== SHARED: action buttons + refresh ===== */
+function rowId(n){return (n||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+function jumpToRow(name){
+  var el=document.getElementById('rbrow-'+rowId(name));
+  if(!el){
+    // player may be filtered out by the position tab -> reset to ALL then retry
+    rbPos='ALL';
+    $$('[data-rpos]').forEach(function(x){x.classList.toggle('on',x.dataset.rpos==='ALL')});
+    renderRounds();
+    el=document.getElementById('rbrow-'+rowId(name));
+  }
+  if(!el)return false;
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  el.classList.remove('rowflash'); void el.offsetWidth; el.classList.add('rowflash');
+  setTimeout(function(){el.classList.remove('rowflash')},1800);
+  return true;
+}
+
 function actBtns(name){var t=isTarget(name);return '<button class="btn-tgt'+(t?' on':'')+'" data-tgt="'+encodeURIComponent(name)+'" title="'+(t?'Remove target':'Target this player')+'">\u2605</button><button class="btn-draft" data-draft="'+encodeURIComponent(name)+'">Drafted</button><button class="btn-mine" data-mine="'+encodeURIComponent(name)+'">My Pick</button>'}
 function renderCounts(){
   var gone=Object.keys(DRAFT).length+(MYDEF?1:0);
@@ -1752,14 +1778,21 @@ function refreshAll(){
 }
 /* ===== SEARCH TYPE-AHEAD (shared by Available Pool + Round Board) ===== */
 var _clearFns=[];
-function makeSearch(boxId,listId){
+function makeSearch(boxId,listId,isRb){
   var box=$(boxId),list=$(listId);if(!box)return;
   function render(q){
     q=q.toLowerCase().trim();
     if(!q){list.innerHTML='';return}
     var hits=avail.filter(function(p){return !poolGone(p)&&p.n.toLowerCase().indexOf(q)>-1}).slice(0,8);
     if(!hits.length){list.innerHTML='<div class="acrow"><span class="acn" style="color:var(--dim)">No available player matches</span></div>';return}
-    list.innerHTML=hits.map(function(p){var btns=p.isDef?'<button class="btn-mine" data-defpick="'+p.defTeam+'">My DEF</button>':'<button class="btn-draft" data-draft="'+encodeURIComponent(p.n)+'">Drafted</button><button class="btn-mine" data-mine="'+encodeURIComponent(p.n)+'">My Pick</button>';return '<div class="acrow"><span class="acn">'+esc(p.n)+'<small>'+p.p+(p.isDef?'':p.prk)+' \u00b7 '+p.t+' \u00b7 val '+p.kv.toFixed(0)+' \u00b7 ADP '+(p.adp==null?'\u2014':p.adp)+'</small></span>'+btns+'</div>'}).join('');
+    list.innerHTML=hits.map(function(p){
+      if(isRb){
+        // round board: tap the row to scroll to the player below. No draft buttons.
+        return '<div class="acrow acjump" data-jump="'+encodeURIComponent(p.n)+'" role="button" tabindex="0"><span class="acn">'+esc(p.n)+'<small>'+p.p+(p.isDef?'':p.prk)+' \u00b7 '+p.t+' \u00b7 val '+p.kv.toFixed(0)+' \u00b7 ADP '+(p.adp==null?'\u2014':p.adp)+' \u00b7 tap to locate</small></span><span class="acgo">\u2193</span></div>';
+      }
+      var btns=p.isDef?'<button class="btn-mine" data-defpick="'+p.defTeam+'">My DEF</button>':'<button class="btn-draft" data-draft="'+encodeURIComponent(p.n)+'">Drafted</button><button class="btn-mine" data-mine="'+encodeURIComponent(p.n)+'">My Pick</button>';
+      return '<div class="acrow"><span class="acn">'+esc(p.n)+'<small>'+p.p+(p.isDef?'':p.prk)+' \u00b7 '+p.t+' \u00b7 val '+p.kv.toFixed(0)+' \u00b7 ADP '+(p.adp==null?'\u2014':p.adp)+'</small></span>'+btns+'</div>';
+    }).join('');
   }
   box.addEventListener('input',function(){render(box.value)});
   box.addEventListener('focus',function(){render(box.value)});
@@ -1767,11 +1800,13 @@ function makeSearch(boxId,listId){
   _clearFns.push(function(){box.value='';list.innerHTML='';});
 }
 makeSearch('#dsearch','#acList');
-makeSearch('#rbsearch','#rbAcList');
+makeSearch('#rbsearch','#rbAcList',true);
 window._clearSearch=function(){_clearFns.forEach(function(f){f()})};
 /* ===== EVENT DELEGATION for all draft buttons ===== */
 document.addEventListener('click',function(e){
   var t=e.target;
+  var jel=t.closest&&t.closest('[data-jump]');
+  if(jel){var nm=decodeURIComponent(jel.getAttribute('data-jump'));var box=$('#rbsearch');if(box)box.value='';var l=$('#rbAcList');if(l)l.innerHTML='';jumpToRow(nm);return;}
   if(t.dataset&&t.dataset.draft!=null){draftPlayer(decodeURIComponent(t.dataset.draft),'theirs');if(window._clearSearch)window._clearSearch();return}
   if(t.dataset&&t.dataset.mine!=null){draftPlayer(decodeURIComponent(t.dataset.mine),'mine');if(window._clearSearch)window._clearSearch();return}
   if(t.dataset&&t.dataset.defpick!=null){draftDef(t.dataset.defpick);return}
